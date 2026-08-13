@@ -860,12 +860,12 @@ function syncOtherDeduct() {
     inp.value = (pen + DEDUCT_CARD).toLocaleString('ko-KR');
     document.getElementById('otherDeductHint').innerHTML =
       basis + ' ' + '× ' + (DEDUCT_RATE * 100) + '% = <b>'
-      + pen.toLocaleString('ko-KR') + '만원</b>' + (pen === DEDUCT_CAP ? '(상한)' : '')
-      + '+ ' + DEDUCT_CARD + '만원 (보수적 추정치)'+'<br>*실제 공제 금액을 입력 시 정확도 향상';
+      + pen.toLocaleString('ko-KR') + '만원</b>' + (pen === DEDUCT_CAP ? ' (상한) ' : '')
+      + '+ ' + DEDUCT_CARD + '만원 (보수적 추정치)'+'<br>*실제 공제 금액 입력 시, 정확도 향상';
   } else {
     document.getElementById('otherDeductHint').innerHTML =
-      '소득공제(추정) = min(' + basis + ' × ' + (DEDUCT_RATE * 100) + '%) + '
-      + DEDUCT_CARD + '만원 (보수적 추정치)<br>*실제 공제 금액을 입력 시 정확도 향상';
+      '소득공제(추정) = (' + basis + ' × ' + (DEDUCT_RATE * 100) + '%) + '
+      + DEDUCT_CARD + '만원 (보수적 추정치)<br>*실제 공제 금액 입력 시, 정확도 향상';
   }
 }
 document.getElementById('autoDeduct').addEventListener('change', function() { syncOtherDeduct(); update(); });
