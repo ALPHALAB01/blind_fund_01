@@ -1,0 +1,8 @@
+# Cloudflare Pages 헤더 규칙
+
+/config.json
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/admin.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store
