@@ -425,7 +425,7 @@
       <div class="sec-head">
         <div class="sec-num">2</div>
         <h2>투자 조건</h2>
-        <span class="sub">조합 규약 기준 · 고정</span>
+        <span class="sub">조합 규약 기준</span>
       </div>
       <div class="grid3" id="condInputs">
         <div class="field">
@@ -448,23 +448,8 @@
 
     <div class="card">
       <div class="sec-head">
-        <div class="sec-num">3</div>
-        <h2>연차별 수익 흐름</h2>
-
-      </div>
-<p class="explain">이자 지급 기간(<span id="expIntSpan">-</span>)에는 <b>고정이자 <span id="expIntRate">-</span>%</b>를 지급하고, <br>전환 후(<span id="expDivSpan">-</span>)에는 <b>매장 이익 100%를 지분율에 따라</b> 배당으로 지급합니다.</p>
-      <table id="timelineTable">
-        <thead><tr><th>연차</th><th>수익 구분</th><th>세전</th><th id="tlNetHead">세후 실수령</th><th id="tlCumHead">누적</th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <div class="hint" style="margin-top:10px">
-배당 수익은 매장 실매출 및 영업이익에 따라 달라질 수 있습니다.<br>본 시뮬레이션은 표준 지표에 따라 배당 연 수익률을 <span id="expDivRate">-</span>%로 가정해 계산되었습니다.</div>
-    </div>
-
-    <div class="card">
-      <div class="sec-head">
-        <div class="sec-num">4</div> 
-        <h2>배당 시뮬레이션</h2>
+        <div class="sec-num">3</div> 
+        <h2>표준 매출/이익 가정</h2>
         <span class="sub">표준 지표 기준</span>
       </div>
       <p class="explain">본 시뮬레이션은 <b>3억/4억/5억원 규모</b>로 각각 2곳씩, <b>총 6개 매장</b>에 투자하는 것을 기준으로 합니다.</p>
@@ -497,15 +482,36 @@
         </div>
       </div>
       <div class="hint" style="margin-top:10px">
-실제 매출·영업이익에 따라 배당 수익이 달라질 수 있습니다. </div>
+실제 매출 및 영업이익에 따라 배당 수익이 달라질 수 있습니다. </div>
     </div>
+
+
+    <div class="card">
+      <div class="sec-head">
+        <div class="sec-num">4</div>
+        <h2>연차별 수익 흐름</h2>
+
+      </div>
+<p class="explain">이자 지급 기간(<span id="expIntSpan">-</span>)에는 <b>고정이자 <span id="expIntRate">-</span>%</b>를 지급하고, <br>전환 후(<span id="expDivSpan">-</span>)에는 <b>매장 이익 100%를 지분율에 따라</b> 배당으로 지급합니다.</p>
+      <table id="timelineTable">
+        <thead><tr><th>연차</th><th>수익 구분</th><th>세전</th><th id="tlNetHead">세후 실수령</th><th id="tlCumHead">누적</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="hint" style="margin-top:10px">
+배당 수익은 매장 실매출 및 영업이익에 따라 달라질 수 있습니다.<br>본 시뮬레이션은 표준 지표에 따라 배당 연 수익률을 <span id="expDivRate">-</span>%로 가정해 계산되었습니다.</div>
+    </div>
+
+
 
     <div class="card">
       <div class="sec-head"><div class="sec-num" style="background:var(--ink-2)">ℹ</div><h2>투자 구조 안내</h2></div>
       <ul class="notes">
-        <li><strong>이자 구간</strong>  전환 전 이자 지급 기간에는 CB 약정이자만 수취합니다</li>
-        <li><strong>전환</strong>  이자 지급 기간 종료 시점에 해산(원금 상환) 또는 보통주 전환을 전제로 하며(조합원 사전 동의), 전환 시 그 다음 해부터 이자 대신 매장 이익에서 반기 배당에 참여합니다</li>
-        <li><strong>원금</strong>  해산 시 원금 상환으로 회수하고, 전환 시 원금은 지분으로 전환됩니다 (조합 기본 존속기간 5년)</li>
+        <li><strong>이자 구간</strong>  보통주 전환 전까지는 CB 약정에 따른 이자를 지급합니다</li>
+        <li><strong>전환</strong>  이자 지급 기간 종료 시점에 보통주 전환을 전제로 하며(조합원 사전 동의), 전환 시 그 다음 해부터 이자 대신 매장 이익에서 반기 배당에 참여합니다</li>
+        <li><strong>존속기간</strong>  조합 기본 존속기간은 5년이며, 원금은 만기 청산 시 회수됩니다</li>
+        <li><strong>조기청산</strong>  투자일로부터 3년이 경과한 이후에는 조기청산이 가능하며, 조기청산하는 경우 별도의 조기청산 프리미엄을 지급합니다 (지급 조건 확정 예정)</li>
+        <li><strong>세제 유의</strong>  출자일 또는 투자일로부터 3년이 경과하기 전에 출자지분을 회수하는 경우, 적용받은 소득공제에 대해 세액이 추징될 수 있으므로 유의가 필요합니다</li>
+
       </ul>
     </div>
   </div>
