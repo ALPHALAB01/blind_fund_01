@@ -405,7 +405,7 @@
           <button type="button" data-tax="post">세후</button>
         </div>
       </div>
-      <p class="explain">본 펀드는 5년 만기 상품으로, <b>초기 2년은 고정이자</b>를, 이후 <b>3년은 배당을 받는 구조</b>입니다.</p>
+      <p class="explain">본 펀드는 5년 만기 상품으로<br><b>초기 2년은 고정이자</b>를, 이후 <b>3년은 배당을 받는 구조</b>입니다.</p>
       <div class="big-result saving-box">
         <div class="sb-top">
           <span class="br-label" id="bigReturnLabel">예상 수익 (세전)</span>
@@ -417,7 +417,7 @@
       <table id="cbTable"><tbody></tbody></table>
       <div class="hint" style="margin-top:10px">
         연간 금융소득 2,000만원 초과 시 종합과세 대상이 되어 실제 부과되는 세금은 달라질 수 있습니다.
-<br>배당은 표준지표에 따른 가정지표로, 실제 매출·영업이익에 따라 달라질 수 있습니다.
+<br>배당은 표준지표에 따른 가정지표로, 실제 매출 및 영업이익에 따라 달라질 수 있습니다.
       </div>
     </div>
 
@@ -482,7 +482,8 @@
         </div>
       </div>
       <div class="hint" style="margin-top:10px">
-실제 매출 및 영업이익에 따라 배당 수익이 달라질 수 있습니다. </div>
+배당 수익은 매장 실매출 및 영업이익에 따라 달라질 수 있습니다.
+ </div>
     </div>
 
 
@@ -498,7 +499,7 @@
         <tbody></tbody>
       </table>
       <div class="hint" style="margin-top:10px">
-배당 수익은 매장 실매출 및 영업이익에 따라 달라질 수 있습니다.<br>본 시뮬레이션은 표준 지표에 따라 배당 연 수익률을 <span id="expDivRate">-</span>%로 가정해 계산되었습니다.</div>
+본 시뮬레이션은 표준 지표에 따라 배당 연 수익률을 <span id="expDivRate">-</span>%로 가정해 계산되었습니다.<br>배당 수익은 매장 실매출 및 영업이익에 따라 달라질 수 있습니다.</div>
     </div>
 
 
@@ -580,7 +581,7 @@
     <div class="card">
       <div class="sec-head"><div class="sec-num" style="background:var(--ink-2)">ℹ</div><h2>매각수익 안내</h2></div>
       <ul class="notes">
-        <li><strong>가정 기반</strong>  EBITDA·멀티플·매각 시점은 실제 매각가액 및 시점에 따라 수익률이 달라질 수 있습니다</li>
+        <li><strong>가정 기반</strong>  EBITDA 등은 실제 매각가액 및 시점에 따라 수익률이 달라질 수 있습니다</li>
         <li><strong>지분율 배분</strong>  매각차익은 조합 지분율에 따라 배분되며, 개인별 수익은 조합 내 출자 비중에 비례합니다</li>
         <li><strong>양도차익 비과세</strong>  조합을 통한 벤처기업 주식 양도차익은 비과세 적용이 가능합니다 (전환 후 3년 보유 시, 요건 충족 필요)</li>
       </ul>
@@ -606,7 +607,7 @@
         <div class="t-note" id="outDividendNote"></div>
       </div>
       <div class="tile">
-        <div class="t-label">④ 매각수익 (가정 · 비과세)</div>
+        <div class="t-label">④ 매각수익 (가정)<span class="tag calc">양도세 비과세</span></div>
         <div class="t-value" id="outExit">-</div>
         <div class="t-note" id="outExitNote"></div>
       </div>
@@ -902,15 +903,15 @@ function update() {
   document.getElementById('outSaving').textContent = includeSaving ? fmtMan(r.saving) : '미포함';
   document.getElementById('outSavingNote').textContent = !includeSaving
     ? '절세효과 OFF 상태' : (r.saving > 0
-    ? '공제 인정 ' + fmtMan(r.angelAllowed) + (r.capped ? ' (한도 적용)' : '') + ' · 세율 ' + r.mRateBefore + '% 구간' : '');
+    ? '공제 인정 ' + fmtMan(r.angelAllowed) + (r.capped ? ' (한도 적용)' : '') + ' (세율 ' + r.mRateBefore + '% 구간)' : '');
   document.getElementById('outInterest').textContent = fmtMan(intShown(r));
   document.getElementById('outInterestNote').textContent = cbRate > 0 && invest > 0
-    ? '연 ' + cbRate + '% × ' + cbYears + '년 · 운용 보수 반영 후' : '';
+    ? '(연 ' + cbRate + '%) × ' + cbYears + '년' : '';
   document.getElementById('outDividend').textContent = divRate > 0 ? fmtMan(divShown(r)) : '미반영';
   document.getElementById('outDividendNote').textContent = divRate > 0
-    ? '연 ' + divRate + '% 가정 × ' + r.divYears + '년 · 운용 보수 반영 후' : '배당률 가정을 입력하면 계산됩니다';
+    ? '(연 ' + divRate + '% 가정) × ' + r.divYears + '년' : '배당률 가정을 입력하면 계산됩니다';
   document.getElementById('outExit').textContent = fmtMan(r.exitProfit);
-  document.getElementById('outExitNote').textContent = '5년차 60억 매각 가정 · 출자금의 ' + (EXIT_RATE * 100).toFixed(1) + '% 배분';
+  document.getElementById('outExitNote').textContent = '5년차 60억 매각 가정 (출자 비중대로 배분)';
 
 
   document.getElementById('bigSaving').textContent = fmtMan(r.saving);
