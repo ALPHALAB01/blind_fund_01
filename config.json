@@ -1,10 +1,10 @@
 {
   "cbRate": 10,
   "cbYears": 2,
-  "divRate": 30,
+  "divRate": 30.12,
   "fundYears": 5,
   "mgmtRate": 0.02,
   "hurdleRate": 0.1,
   "carryRate": 0.3,
-  "updated": "2026-08-13"
+  "updated": "2026-08-14"
 }
