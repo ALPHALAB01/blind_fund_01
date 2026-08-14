@@ -525,13 +525,12 @@
               <option value="seq">작성순서</option>
               <option value="inv">투자금 순</option>
               <option value="match">매칭금 순</option>
-              <option value="fund">조합투자금 순</option>
               <option value="drag">직접 정렬 (드래그)</option>
             </select>
           </label>
         </div>
         <div style="overflow-x:auto">
-          <table id="customTable" style="min-width:820px"><tbody></tbody></table>
+          <table id="customTable" style="min-width:700px"><tbody></tbody></table>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-top:8px">
           <button type="button" id="btnAddCol" style="font-family:inherit;font-size:14px;font-weight:700;color:#fff;background:var(--series-1);border:none;border-radius:8px;padding:8px 16px;cursor:pointer">＋ 행 추가</button>
@@ -539,14 +538,14 @@
         <div class="capnote" id="customWarn" style="margin-top:12px"></div>
         <div class="tiles" style="margin-top:16px">
           <div class="tile">
-            <div class="t-label">최종 매장 투자금</div>
-            <div class="t-value" id="cusStoreTotal">-</div>
-            <div class="t-note">Σ 투자금</div>
-          </div>
-          <div class="tile">
             <div class="t-label">최종 조합 투자금</div>
             <div class="t-value" id="cusFundTotal">-</div>
-            <div class="t-note">Σ (매칭금 + 투자금 ÷ 2)</div>
+            <div class="t-note">Σ 매칭금</div>
+          </div>
+          <div class="tile">
+            <div class="t-label">브랜드 출자금</div>
+            <div class="t-value" id="cusBrandTotal">-</div>
+            <div class="t-note">Σ 브랜드 출자금</div>
           </div>
           <div class="tile">
             <div class="t-label">총 조합 지분</div>
@@ -1151,7 +1150,6 @@ loadConfig();
 /* ========== 커스텀 표준 매출/이익 시뮬레이션 ========== */
 (function() {
   var MATCH_CAP = 2.5;    // 매칭금 최대 (억)
-  var RATIO_MIN = 0.5;    // 매칭비율 최소 (배)
   var INV_MIN = 1;        // 투자금 최소 (억)
   var roiRate = 50;       // 연 ROI 기본 50% (회수기간 = 100 ÷ ROI 년, 일괄 적용)
   var salesMode = 'std';  // 기본: 표준 가중식(구간 보간) | 'rate': 투자금의 N%
@@ -1193,17 +1191,16 @@ loadConfig();
   }
   function calcStore(s) {
     var match = s.inv - s.brand;                                // 매칭금(일반 LP) = 투자금 - 브랜드 출자금
-    var ratio = s.inv > 0 ? match / (s.inv / 2) : 0;            // 매칭비율 = 매칭금 ÷ (투자금의 절반) — 4억/브랜드3억→0.5배, 4억/브랜드2억→1배
-    var share = ratio > 0 ? ratio / (1 + ratio) : 0;            // 지분률: 1배→50%, 0.5배→33.3%
-    var fund = match + s.inv / 2;                               // 조합 투자금 = 매칭금 + 투자금의 절반 (3억·0.5배 → 2.25억)
+    var share = s.inv > 0 ? match / s.inv : 0;                  // 펀드 지분률 = 매칭금 ÷ 투자금
+    var fund = match;                                           // 조합 투자금 = 매칭금
     // ROI 모드: 월 영업이익 = 투자금 ÷ 회수개월(1200/ROI) → 월 매출 = 영업이익 ÷ 영업이익률, 백만원 단위 올림
     var autoSales = salesMode === 'std' ? stdSales(s.inv)
       : (opRate > 0 && roiRate > 0 ? Math.ceil(s.inv * 10000 * (roiRate / 1200) / opRate / 100) * 100 / 10000 : 0);
     var sales = (s.sales != null) ? s.sales : autoSales;        // 수동 입력 시 그 값 사용
     var op = sales * opRate;                                    // 표준 영업이익(월) = 매출 × 영업이익률
-    return { match: match, ratio: ratio, share: share, fund: fund, sales: sales, op: op,
+    return { match: match, share: share, fund: fund, sales: sales, op: op,
              salesManual: s.sales != null,
-             warnMatch: match > MATCH_CAP + 1e-9, warnRatio: ratio < RATIO_MIN - 1e-9 };
+             warnMatch: match > MATCH_CAP + 1e-9, warnBrand: s.brand < match - 1e-9 };
   }
 
   var WARN_STYLE = 'background:var(--warnrow-bg);color:var(--series-2);font-weight:800';
@@ -1236,12 +1233,10 @@ loadConfig();
       + '<th style="text-align:center">번호</th>'
       + '<th style="text-align:center">투자금 (억)</th>'
       + '<th style="text-align:center">브랜드 출자금 (억)</th>'
-      + '<th style="text-align:center">매칭비율 (배)</th>'
       + '<th style="text-align:center">매칭금</th>'
       + '<th style="text-align:center">펀드 지분률</th>'
       + '<th style="text-align:center">표준 매출 (월)</th>'
       + '<th style="text-align:center">표준 영업이익 (월)</th>'
-      + '<th style="text-align:center">조합 투자금</th>'
       + '</tr>';
     // 매장별 행
     stores.forEach(function(s, i) {
@@ -1254,8 +1249,7 @@ loadConfig();
         + '<span style="margin-left:auto;font-weight:700">' + (i + 1) + '</span>'
         + '</div></td>';
       h += inpCell(i, 'inv', s.inv, INV_MIN, 1);   // 화살표(스피너)는 1억 단위, 직접 기입은 0.1억 단위(blur 시 반올림)
-      h += inpCell(i, 'brand', s.brand, 0, 1); // 브랜드 출자금: 스피너 1억 단위, 직접 기입 0.01억 단위
-      h += '<td class="c-ratio"' + (c.warnRatio ? ' style="' + WARN_STYLE + '"' : '') + '>' + (Math.round(c.ratio * 100) / 100) + '배</td>';
+      h += inpCell(i, 'brand', s.brand, 0, 1).replace('<td>', '<td' + (c.warnBrand ? ' style="' + WARN_STYLE + '"' : '') + '>'); // 스피너 1억, 직접 기입 0.01억 단위
       h += '<td class="c-match"' + (c.warnMatch ? ' style="' + WARN_STYLE + '"' : '') + '>' + fmtEok(c.match) + '</td>';
       h += '<td class="c-share">' + (c.share * 100).toFixed(1) + '%</td>';
       h += '<td><input type="text" inputmode="numeric" class="cus-inp" data-idx="' + i + '" data-key="sales"'
@@ -1265,7 +1259,6 @@ loadConfig();
         + 'padding:6px 8px;font-family:inherit;font-size:15px;font-weight:700;text-align:right;color:var(--ink-1)">'
         + '<span style="font-size:12px;color:var(--muted)"> 만원</span></td>';
       h += '<td class="c-op">' + fmtEok(c.op) + '</td>';
-      h += '<td class="c-fund">' + fmtEok(c.fund) + '</td>';
       h += '</tr>';
     });
     // 합계 행 (각 열 아래 sum)
@@ -1273,12 +1266,10 @@ loadConfig();
       + '<td>합계</td>'
       + '<td>' + fmtEok(A.sumInv) + '</td>'
       + '<td>' + fmtEok(A.sumBrand) + '</td>'
-      + '<td>-</td>'
       + '<td>' + fmtEok(A.sumMatch) + '</td>'
       + '<td>평균 ' + (A.avgShare * 100).toFixed(2) + '%</td>'
       + '<td>' + fmtEok(A.sumSales) + '</td>'
       + '<td>' + fmtEok(A.sumOp) + '</td>'
-      + '<td>' + fmtEok(A.sumFund) + '</td>'
       + '</tr>';
     document.querySelector('#customTable tbody').innerHTML = h;
     renderOutputs(A);
@@ -1292,29 +1283,26 @@ loadConfig();
     var active = document.activeElement;
     stores.forEach(function(s, i) {
       var c = A.calcs[i], cells = rows[i + 1].cells;
-      // 셀: 0 번호 | 1 투자금 | 2 브랜드 출자금 | 3 매칭비율 | 4 매칭금 | 5 지분률 | 6 매출 | 7 영업이익 | 8 조합투자금
-      cells[3].style.cssText = c.warnRatio ? WARN_STYLE : '';
-      cells[3].textContent = (Math.round(c.ratio * 100) / 100) + '배';
-      cells[4].style.cssText = c.warnMatch ? WARN_STYLE : '';
-      cells[4].textContent = fmtEok(c.match);
-      cells[5].textContent = (c.share * 100).toFixed(1) + '%';
-      var salesInp = cells[6].querySelector('input');
+      // 셀: 0 번호 | 1 투자금 | 2 브랜드 출자금 | 3 매칭금 | 4 지분률 | 5 매출 | 6 영업이익
+      cells[2].style.cssText = c.warnBrand ? WARN_STYLE : '';
+      cells[3].style.cssText = c.warnMatch ? WARN_STYLE : '';
+      cells[3].textContent = fmtEok(c.match);
+      cells[4].textContent = (c.share * 100).toFixed(1) + '%';
+      var salesInp = cells[5].querySelector('input');
       if (salesInp && salesInp !== active) {
         if (!c.salesManual) salesInp.value = fmtComma(Math.round(c.sales * 10000));
         salesInp.style.border = '1.5px ' + (c.salesManual ? 'solid var(--series-1)' : 'dashed var(--baseline)');
         salesInp.title = c.salesManual ? '직접 입력값 (비우면 자동값으로 복원)' : (salesMode === 'std' ? '자동값: 표준 가중식 (3억→8,000만 · 4억→1.3억 · 5억→2억 보간)' : '자동값: 연 ROI ' + roiRate + '% (회수기간 ' + fmtPayback() + ') 기준 역산, 백만원 단위 올림');
       }
-      cells[7].textContent = fmtEok(c.op);
-      cells[8].textContent = fmtEok(c.fund);
+      cells[6].textContent = fmtEok(c.op);
     });
     var sc = rows[n + 1].cells;
     sc[1].textContent = fmtEok(A.sumInv);
     sc[2].textContent = fmtEok(A.sumBrand);
-    sc[4].textContent = fmtEok(A.sumMatch);
-    sc[5].textContent = '평균 ' + (A.avgShare * 100).toFixed(2) + '%';
-    sc[6].textContent = fmtEok(A.sumSales);
-    sc[7].textContent = fmtEok(A.sumOp);
-    sc[8].textContent = fmtEok(A.sumFund);
+    sc[3].textContent = fmtEok(A.sumMatch);
+    sc[4].textContent = '평균 ' + (A.avgShare * 100).toFixed(2) + '%';
+    sc[5].textContent = fmtEok(A.sumSales);
+    sc[6].textContent = fmtEok(A.sumOp);
     renderOutputs(A);
   }
 
@@ -1324,15 +1312,15 @@ loadConfig();
     var warns = [];
     calcs.forEach(function(c, i) {
       if (c.warnMatch) warns.push('<b>' + (i + 1) + '번 매장</b>: 최대 매칭 한도(<b>2.5억원</b>) 초과');
-      if (c.warnRatio) warns.push('<b>' + (i + 1) + '번 매장</b>: 매칭비율 ' + (Math.round(c.ratio * 100) / 100) + '배 — 최소 매칭비율(<b>0.5배</b>) 미만');
+      if (c.warnBrand) warns.push('<b>' + (i + 1) + '번 매장</b>: 브랜드 출자금(' + fmtEok(stores[i].brand) + ')이 매칭금(' + fmtEok(c.match) + ')보다 작습니다');
     });
     var wEl = document.getElementById('customWarn');
     if (warns.length) { wEl.className = 'capnote show'; wEl.innerHTML = '⚠ ' + warns.join('<br>⚠ '); }
     else wEl.className = 'capnote';
 
     // 최종 결과
-    document.getElementById('cusStoreTotal').textContent = fmtEok(A.sumInv);
     document.getElementById('cusFundTotal').textContent = fmtEok(A.sumFund);
+    document.getElementById('cusBrandTotal').textContent = fmtEok(A.sumBrand);
     document.getElementById('cusEquityTotal').textContent = fmtEok(A.sumEquity);
     document.getElementById('cusEquityNote').textContent = '가중평균 지분률 ' + (A.avgShare * 100).toFixed(2) + '%';
 
@@ -1429,7 +1417,6 @@ loadConfig();
     if (v === 'seq') stores.sort(function(a, b) { return a._seq - b._seq; });
     else if (v === 'inv') stores.sort(function(a, b) { return b.inv - a.inv; });
     else if (v === 'match') stores.sort(function(a, b) { return calcStore(b).match - calcStore(a).match; });
-    else if (v === 'fund') stores.sort(function(a, b) { return calcStore(b).fund - calcStore(a).fund; });
     // 'drag': 현재 순서 유지
   }
   sortSel.addEventListener('change', function() { applySort(); renderCustom(); });
