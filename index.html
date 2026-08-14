@@ -1134,6 +1134,9 @@ function loadConfig() {
           ['cbRate','cbYears','divRate','fundYears','mgmtRate','hurdleRate','carryRate'].forEach(function(k) {
             if (typeof c[k] === 'number' && isFinite(c[k])) CONFIG[k] = c[k];
           });
+          // 구버전 config.json 호환: 반올림 관행값 30은 표준 흐름도 산출값 30.12로 보정
+          // (14.76억 × 42.86% ÷ 21억 = 30.12% — 커스텀 모드 기본값과의 첫 화면 정합 유지)
+          if (CONFIG.divRate === 30) CONFIG.divRate = 30.12;
           if (typeof c.updated === 'string') CONFIG.updated = c.updated;
         }
         finish();
