@@ -340,7 +340,7 @@
     </div>
     <div class="field">
       <label>조합 배당 참여율 <span class="sub">(영업이익 중 조합 몫)</span></label>
-      <div class="inp"><input id="pubShare" inputmode="decimal" value="42.71"><span class="unit">%</span></div>
+      <div class="inp"><input id="pubShare" inputmode="decimal" value="42.86"><span class="unit">%</span></div>
       <div class="hint">매장 영업이익 중 조합에 귀속되는 비율</div>
     </div>
     <div class="field">
@@ -649,7 +649,7 @@ function publishSync(x){
   var auto=el("pubAuto").checked;
   var share=num(el("pubShare").value)/100;
   var divAuto=(x.T>0)?(x.sumOpN*x.payout*share/x.T*100):0;
-  el("pubDivHint").textContent="자동값 "+divAuto.toFixed(1)+"% = 연 영업이익 "+fmtMan(x.sumOpN)+" × 배당성향 "+pct(x.payout,0)+" × 참여율 "+pct(share,2)+" ÷ 총 투자금 "+fmtMan(x.T);
+  el("pubDivHint").textContent="자동값 "+divAuto.toFixed(2)+"% = 연 영업이익 "+fmtMan(x.sumOpN)+" × 배당성향 "+pct(x.payout,0)+" × 참여율 "+pct(share,2)+" ÷ 총 투자금 "+fmtMan(x.T);
   PUB_IDS.forEach(function(id){
     var free=(PUB_FREE.indexOf(id)>=0);
     var w=el("w_"+id); if(w) w.className="inp"+(auto&&!free?" off":"");
@@ -658,7 +658,7 @@ function publishSync(x){
   if(auto){
     el("pubCbRate").value=(x.intRate*100).toFixed(1).replace(/\.0$/,"");
     el("pubCbYears").value=x.NI;
-    el("pubDivRate").value=divAuto.toFixed(1).replace(/\.0$/,"");
+    el("pubDivRate").value=divAuto.toFixed(2).replace(/\.?0+$/,"");
   }
   if(!el("pubUpdated").value) el("pubUpdated").value=today();
   state.pubMeta={FY:x.FY,fee:x.fee,hurdle:x.hurdle,hCarry:x.hCarry};
