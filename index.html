@@ -290,6 +290,7 @@
     <button type="button" data-tab="tax" class="on">세제혜택</button>
     <button type="button" data-tab="return">투자수익</button>
     <button type="button" data-tab="exit">매각수익</button>
+    <button type="button" data-tab="safety">안정성 검토</button>
     <button type="button" data-tab="all">종합</button>
   </div>
 
@@ -504,6 +505,17 @@
           .sales-mode { font-family: inherit; font-size: 13.5px; font-weight: 700; color: var(--muted); background: transparent; border: 1.5px solid var(--baseline); border-radius: 8px; padding: 4px 10px; cursor: pointer; }
           .sales-mode.on { color: #fff; background: var(--series-1); border-color: var(--series-1); }
           .sales-mode.on input { background: #fff; }
+          /* 조기청산 프리미엄: 4열 고정 + 폭에 따라 폰트 자동 축소, 줄넘김 없음 */
+          .tiles.ep-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: clamp(6px, 1vw, 14px); }
+          .ep-tiles .tile { min-width: 0; padding: clamp(8px, 1.3vw, 14px) clamp(6px, 1vw, 14px); }
+          .ep-tiles .t-label { font-size: clamp(9.5px, 1.35vw, 13px); white-space: nowrap; overflow: hidden; }
+          .ep-tiles .t-value { font-size: clamp(11.5px, 2.1vw, 18px); white-space: nowrap; }
+          .ep-tiles .t-note { font-size: clamp(8.5px, 1.2vw, 11.5px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          .ep-rate { min-width: clamp(110px, 18vw, 170px); padding: clamp(9px, 1.6vw, 14px) clamp(12px, 2.4vw, 22px); }
+          .stealth-inp { border: none; background: transparent; font-family: inherit; font-size: inherit; font-weight: 800; color: var(--ink-1); width: 2em; text-align: center; padding: 0; border-bottom: 1.5px dashed var(--baseline); border-radius: 0; cursor: pointer; -moz-appearance: textfield; appearance: textfield; }
+          .stealth-inp::-webkit-outer-spin-button, .stealth-inp::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+          .stealth-inp:hover, .stealth-inp:focus { background: var(--input-bg); border: 1.5px solid var(--baseline); border-radius: 6px; width: 58px; padding: 2px 4px; -moz-appearance: auto; appearance: auto; outline: none; }
+          .stealth-inp:hover::-webkit-inner-spin-button, .stealth-inp:focus::-webkit-inner-spin-button { -webkit-appearance: auto; }
           .cus-drag { cursor: grab; color: var(--muted); font-size: 13px; user-select: none; padding: 0 2px; }
           .cus-drag:active { cursor: grabbing; }
         </style>
@@ -679,6 +691,97 @@
   </div>
 
   <!-- ========== 탭 4: 종합 ========== -->
+  <!-- ========== 탭: 안정성 ========== -->
+  <div class="tabpage" id="page-safety">
+
+    <div class="card">
+      <div class="sec-head"><div class="sec-num">1</div><h2>이자 지급 여력</h2><span class="sub" id="safeModeLabel">표준 가정 기준</span></div>
+      <p class="explain">조합 투자금의 연 <input type="number" id="safeCbInp" class="stealth-inp" value="10" min="0.1" max="100" step="1" title="클릭하거나 마우스를 올리면 조정할 수 있습니다">%를 이자로 지급합니다. 이 금액이 매장 매출·영업이익에서 차지하는 비중입니다.</p>
+      <div class="tiles">
+        <div class="tile">
+          <div class="t-label">연 이자 지급액</div>
+          <div class="t-value" id="safeIntAmt">-</div>
+          <div class="t-note" id="safeIntNote">-</div>
+        </div>
+        <div class="tile">
+          <div class="t-label">매출 대비</div>
+          <div class="t-value" id="safeIntVsSales">-</div>
+          <div class="t-note" id="safeSalesNote">-</div>
+        </div>
+        <div class="tile">
+          <div class="t-label">영업이익 대비</div>
+          <div class="t-value" id="safeIntVsOp">-</div>
+          <div class="t-note" id="safeOpNote">-</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec-head"><div class="sec-num">2</div><h2>청산 잔존 가치</h2></div>
+      <p class="explain">사업이 조기 종료되더라도 시나리오별로 <b>회수 가능한 최소 가치</b>입니다.</p>
+      <div style="overflow-x:auto"><table id="safeLiqTable" style="min-width:560px"><tbody></tbody></table></div>
+      <div class="hint" style="margin-top:10px">매장 투자금은 <b>보증금 30% · 권리금 20% · 시설비 50%</b> 구성을 기준으로 한 가정이며, 실제 비율과 회수 금액은 매장 조건·계약 내용·청산 시점에 따라 달라질 수 있습니다.<br>절세 포함 실질 회수율 = 회수율 + 세제혜택 절세율 (세제혜택 탭의 본인 소득·출자 조건 기준)</div>
+    </div>
+
+    <div class="card">
+      <div class="sec-head"><div class="sec-num">3</div><h2>원금회수</h2><span class="sub">원금상환율 120% 이상 적격</span></div>
+      <p class="explain">투자기간(5년) 동안 지급되는 <b>이자+배당</b>만으로 투자금 이상을 확보할 수 있는지 판단합니다.</p>
+      <div style="overflow-x:auto"><table id="safePayTable" style="min-width:520px"><tbody></tbody></table></div>
+      <div class="hint" style="margin-top:10px">원금상환율 = 투자기간 세전이익 총합 ÷ 투자금</div>
+    </div>
+
+    <div class="card">
+      <div class="sec-head"><div class="sec-num">4</div><h2>이자조달</h2><span class="sub">이자보상배율 200% 이상 적격</span></div>
+      <p class="explain">사업의 <b>연간 영업이익으로 연간 이자비용을 감당</b>할 수 있는지 보는 지표입니다.</p>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:13.5px;font-weight:700;color:var(--ink-1)">
+        <span>이자비율</span>
+        <input type="number" id="safeRateInp" value="10" min="0.1" max="100" step="1" style="width:64px;border:1.5px solid var(--baseline);border-radius:8px;background:var(--input-bg);padding:5px 8px;font-family:inherit;font-size:14.5px;font-weight:700;text-align:right;color:var(--ink-1)"><span>%</span>
+      </div>
+      <div style="overflow-x:auto"><table id="safeIcrTable" style="min-width:640px"><tbody></tbody></table></div>
+      <div class="hint" style="margin-top:10px">이자보상배율 = 연간 영업이익 ÷ 연간 이자비용</div>
+    </div>
+
+    <div class="card">
+      <div class="sec-head"><div class="sec-num">5</div><h2>조기청산 프리미엄</h2><span class="sub">36개월 시점 선택권</span></div>
+      <p class="explain"><b>36개월 후</b> 희망자는 <b>조기청산 프리미엄</b>을 받고 나갈 수 있습니다.</p>
+      <div class="tiles ep-tiles">
+        <div class="tile">
+          <div class="t-label">세제혜택</div>
+          <div class="t-value" id="epSaving">-</div>
+        </div>
+        <div class="tile">
+          <div class="t-label">이자수익</div>
+          <div class="t-value" id="epInterest">-</div>
+          <div class="t-note" id="epInterestNote">1~2년차</div>
+        </div>
+        <div class="tile">
+          <div class="t-label">배당수익</div>
+          <div class="t-value" id="epDividend">-</div>
+          <div class="t-note" id="epDividendNote">3년차</div>
+        </div>
+        <div class="tile" style="border-color:var(--series-1)">
+          <div class="t-label" style="color:var(--series-1)">＋ 조기청산 프리미엄</div>
+          <div class="t-value" id="epPremium" style="color:var(--series-1)">-</div>
+          <div class="t-note" id="epPremiumNote">-</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;margin-top:14px;align-items:stretch;flex-wrap:wrap">
+        <div style="flex:1 1 300px;background:var(--accent-bg);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;flex-direction:column;justify-content:center">
+          <span style="font-size:12.5px;font-weight:800;color:var(--series-1-strong)">36개월 조기청산 시 총 수익 (세전, 원금 별도)</span>
+          <span style="font-size:15px;font-weight:800;color:var(--ink-1);margin-top:4px">= <b id="epTotal" style="color:var(--series-1);font-size:clamp(16px,2.4vw,21px);white-space:nowrap">-</b></span>
+ <span style="font-size:14px;font-weight:700;color:var(--ink-1);margin-top:4px"><span id="epEquation">-</span></span>
+        </div>
+        <div class="ep-rate" style="flex:0 0 auto;background:var(--series-1);border-radius:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff">
+          <span style="font-size:clamp(10.5px,1.35vw,12.5px);font-weight:800;opacity:0.85;white-space:nowrap">총 수익률</span>
+          <span id="epRateMain" style="font-size:clamp(19px,3vw,27px);font-weight:800;line-height:1.25;white-space:nowrap">-</span>
+          <span id="epRateSub" style="font-size:clamp(10px,1.35vw,12.5px);font-weight:700;opacity:0.85;white-space:nowrap">-</span>
+        </div>
+      </div>
+      <div class="hint" style="margin-top:10px">조기청산 프리미엄 = (최근 6개월 조합의 월평균 배당금) × 6<br>*세전 기준 가정입니다.</div>
+    </div>
+
+  </div>
+
   <div class="tabpage" id="page-all">
     <div class="tiles four" style="margin-bottom:18px">
       <div class="tile">
@@ -899,7 +1002,7 @@ document.getElementById('segIncome').addEventListener('click', function(e) {
 document.getElementById('tabbar').addEventListener('click', function(e) {
   var btn = e.target.closest('button'); if (!btn) return;
   this.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b === btn); });
-  ['tax','return','exit','all'].forEach(function(t) {
+  ['tax','return','exit','safety','all'].forEach(function(t) {
     document.getElementById('page-' + t).classList.toggle('active', t === btn.dataset.tab);
   });
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -932,6 +1035,28 @@ function attachToggleTable(id) {
   });
 }
 ['taxTable', 'cbTable', 'exitTable'].forEach(attachToggleTable);
+document.getElementById('safeCbInp').addEventListener('input', function() {
+  safeCbTouched = true;
+  renderSafety();
+});
+document.getElementById('safeCbInp').addEventListener('focusout', function() {
+  var v = parseFloat(this.value);
+  if (!isFinite(v) || v <= 0) { this.value = CONFIG.cbRate; safeCbTouched = false; }
+  renderSafety();
+});
+document.getElementById('safeRateInp').addEventListener('input', function() {
+  safeRateTouched = true;
+  lastSavingPct = invest > 0 ? r.saving / invest * 100 : 0;   // 본인 절세율 — 청산 잔존가치 실질 회수율에 반영
+  lastInvestWon = invest;                                      // 본인 출자금 — 청산 시 회수 예상액 계산
+  renderSafety();
+});
+document.getElementById('safeRateInp').addEventListener('focusout', function() {
+  var v = parseFloat(this.value);
+  if (!isFinite(v) || v <= 0) { this.value = CONFIG.cbRate; safeRateTouched = false; }
+  lastSavingPct = invest > 0 ? r.saving / invest * 100 : 0;   // 본인 절세율 — 청산 잔존가치 실질 회수율에 반영
+  lastInvestWon = invest;                                      // 본인 출자금 — 청산 시 회수 예상액 계산
+  renderSafety();
+});
 document.getElementById('segTax').addEventListener('click', function(e) {
   var btn = e.target.closest('button'); if (!btn) return;
   returnPretax = btn.dataset.tax === 'pre';
@@ -968,6 +1093,108 @@ function syncOtherDeduct() {
   }
 }
 document.getElementById('autoDeduct').addEventListener('change', function() { syncOtherDeduct(); update(); });
+
+/* ========== 안정성 탭 ========== */
+var safeRateTouched = false, safeCbTouched = false, lastSavingPct = 0, lastInvestWon = 0, safeSummaryLiq = 0;
+function fmtEokG(v) {   // 소수 억 표기 (전역)
+  var t = (Math.round(v * 100) / 100).toFixed(2).replace(/\.?0+$/, '');
+  return t + '억원';
+}
+function safetyData() {
+  if (customMode && customCalc && customCalc.invEok != null) {
+    return { label: '커스텀 가정 기준', inv: customCalc.invEok, fund: customCalc.fundEok,
+             salesYear: customCalc.salesYearEok, opYear: customCalc.opYearEok, divRate: customCalc.divRate };
+  }
+  // 표준 가정: 매장 투자금 24억, 조합 투자금 21억, 월 매출 8.2억 → 연 98.4억, 연 영업이익 14.76억
+  return { label: '표준 가정 기준', inv: 24, fund: 21, salesYear: 98.4, opYear: 14.76, divRate: CONFIG.divRate };
+}
+function renderSafety() {
+  var el = document.getElementById('safeIntAmt');
+  if (!el) return;
+  var D = safetyData();
+  document.getElementById('safeModeLabel').textContent = D.label;
+  var cbRate = CONFIG.cbRate, cbYears = CONFIG.cbYears, divYears = FUND_YEARS - cbYears;
+
+  // 1) 이자 지급 여력 — 카드 내 스피너(기본: 조합 이자율)로 조정 가능
+  var cbInp = document.getElementById('safeCbInp');
+  if (!safeCbTouched) cbInp.value = cbRate;
+  var secRate = parseFloat(cbInp.value); if (!isFinite(secRate) || secRate <= 0) secRate = cbRate;
+  var intYear = D.fund * secRate / 100;
+  document.getElementById('safeIntAmt').textContent = fmtEokG(intYear);
+  document.getElementById('safeIntNote').textContent = '조합 투자금 ' + fmtEokG(D.fund) + ' × 연 ' + secRate + '%';
+  document.getElementById('safeIntVsSales').textContent = D.salesYear > 0 ? (intYear / D.salesYear * 100).toFixed(2) + '%' : '-';
+  document.getElementById('safeSalesNote').textContent = '연 매출 ' + fmtEokG(D.salesYear) + ' 기준';
+  document.getElementById('safeIntVsOp').textContent = D.opYear > 0 ? (intYear / D.opYear * 100).toFixed(2) + '%' : '-';
+  document.getElementById('safeOpNote').textContent = '연 영업이익 ' + fmtEokG(D.opYear) + ' 기준';
+
+  // 2) 청산 잔존 가치 — 매장 투자금 기준 보증금 30 / 권리금 20 / 시설비 50
+  var dep = D.inv * 0.30, key = D.inv * 0.20, fac = D.inv * 0.50;
+  var savingPct = lastSavingPct;   // 세제혜택(절세)은 투자 시점에 확정 — 본인 절세율 기준
+  function liqRow(tier, name, hasDep, hasKey, hasFac) {
+    var v = (hasDep ? dep : 0) + (hasKey ? key : 0) + (hasFac ? fac : 0);
+    var rec = D.inv > 0 ? v / D.inv * 100 : 0;
+    var mk = function(on, amt) { return on ? fmtEokG(amt) : '<span style="color:var(--muted)">-</span>'; };
+    return '<tr><td style="font-weight:700">' + tier + '<br><span style="font-size:12px;color:var(--muted)">' + name + '</span></td>'
+      + '<td>' + mk(hasDep, dep) + '</td><td>' + mk(hasKey, key) + '</td><td>' + mk(hasFac, fac) + '</td>'
+      + '<td class="em">' + fmtEokG(v) + '</td><td>' + Math.round(rec) + '%</td>'
+      + '<td class="em" style="color:var(--series-1)">' + Math.round(rec + savingPct) + '%</td></tr>';
+  }
+  document.querySelector('#safeLiqTable tbody').innerHTML =
+    '<tr><th style="text-align:left">구분</th><th>보증금 (30%)</th><th>권리금 (20%)</th><th>시설비 (50%)</th><th>잔존 가치</th><th>회수율</th><th>절세 포함<br>실질 회수율</th></tr>'
+    + liqRow('TIER 1', '보수적', true, false, false)
+    + liqRow('TIER 2', '평균', true, true, false)
+    + liqRow('TIER 3', '이상적', true, true, true);
+  safeSummaryLiq = Math.round((D.inv > 0 ? dep / D.inv * 100 : 0) + savingPct);   // TIER 1 절세 포함 = 최악 시나리오 최소 회수율
+
+  // 3) 원금회수 — 세전이익(투자기간) = 이자(2년) + 배당(3년), 원금상환율 = ÷ 투자금, 120% 이상 적격
+  var pretax = D.fund * (cbRate * cbYears + D.divRate * divYears) / 100;
+  var payRate = D.fund > 0 ? pretax / D.fund * 100 : 0;
+  var payOk = payRate >= 120;
+  document.querySelector('#safePayTable tbody').innerHTML =
+    '<tr><th style="text-align:left">투자금액</th><th>세전이익 (투자기간 ' + FUND_YEARS + '년)</th><th>원금상환율</th><th>판단</th></tr>'
+    + '<tr><td>' + fmtEokG(D.fund) + '</td>'
+    + '<td>' + fmtEokG(pretax) + '<br><span style="font-size:12px;color:var(--muted)">이자 ' + cbYears + '년 + 배당 ' + divYears + '년 (연 ' + D.divRate + '%)</span></td>'
+    + '<td class="em">' + payRate.toFixed(1) + '%</td>'
+    + '<td style="font-weight:800;color:' + (payOk ? 'var(--series-1)' : 'var(--series-2)') + '">' + (payOk ? '적격' : '부적격') + '</td></tr>';
+
+  // 4) 이자조달 — 이자보상배율 = 연간 영업이익 ÷ 연간 이자비용, 200% 이상 적격
+  var sr = document.getElementById('safeRateInp');
+  if (!safeRateTouched) sr.value = cbRate;
+  var rate = parseFloat(sr.value); if (!isFinite(rate) || rate <= 0) rate = cbRate;
+  var intCost = D.fund * rate / 100;
+  var icr = intCost > 0 ? D.opYear / intCost * 100 : 0;
+  var icrOk = icr >= 200;
+  document.querySelector('#safeIcrTable tbody').innerHTML =
+    '<tr><th style="text-align:left">투자금액</th><th>이자비율</th><th>영업이익 (연)</th><th>이자비용 (연)</th><th>이자보상배율</th><th>판단</th></tr>'
+    + '<tr><td>' + fmtEokG(D.fund) + '</td><td>연 ' + rate + '%</td>'
+    + '<td>' + fmtEokG(D.opYear) + '</td><td>' + fmtEokG(intCost) + '</td>'
+    + '<td class="em">' + Math.round(icr) + '%</td>'
+    + '<td style="font-weight:800;color:' + (icrOk ? 'var(--series-1)' : 'var(--series-2)') + '">' + (icrOk ? '적격' : '부적격') + '</td></tr>';
+
+  // 5) 조기청산 프리미엄 : 36개월 시점, 본인 출자금 기준 (세전)
+  var epEl = document.getElementById('epPremium');
+  if (epEl) {
+    var inv = lastInvestWon;                                     // 본인 출자금 (원)
+    var saving = inv * lastSavingPct / 100;                      // 세제혜택
+    var intSum = inv * cbRate / 100 * cbYears;                   // 이자수익 1~2년차
+    var divSum = inv * D.divRate / 100 * 1;                      // 배당수익 3년차 1년분
+    var premium = inv * D.divRate / 100 / 12 * 6;                // 월평균 배당금 × 6
+    var total = saving + intSum + divSum + premium;
+    var totalPct = inv > 0 ? total / inv * 100 : 0;
+    epEl.textContent = fmtManInt(manRound(premium));
+    document.getElementById('epPremiumNote').textContent = '월평균 배당금 ' + fmtManInt(manRound(inv * D.divRate / 100 / 12)) + ' × 6개월';
+    document.getElementById('epSaving').textContent = fmtManInt(manRound(saving));
+    document.getElementById('epInterest').textContent = fmtManInt(manRound(intSum));
+    document.getElementById('epInterestNote').textContent = '1~2년차 (연 ' + cbRate + '%)';
+    document.getElementById('epDividend').textContent = fmtManInt(manRound(divSum));
+    document.getElementById('epDividendNote').textContent = '3년차 1년분 (연 ' + D.divRate + '%)';
+    document.getElementById('epEquation').textContent =
+      fmtManInt(manRound(saving)) + ' + ' + fmtManInt(manRound(intSum)) + ' + ' + fmtManInt(manRound(divSum)) + ' + ' + fmtManInt(manRound(premium));
+    document.getElementById('epTotal').textContent = fmtManInt(manRound(total));
+    document.getElementById('epRateMain').textContent = totalPct.toFixed(1) + '%';
+    document.getElementById('epRateSub').textContent = '연 평균 ' + (totalPct / 3).toFixed(1) + '%';
+  }
+}
 
 function update() {
   syncOtherDeduct();
@@ -1110,6 +1337,9 @@ function update() {
 
   document.getElementById('incomeHint').textContent = mode === 'salary'
     ? '종합소득금액(근로소득금액)으로 환산: ' + fmtMan(r.gwa) : '';
+  lastSavingPct = invest > 0 ? r.saving / invest * 100 : 0;   // 본인 절세율 — 청산 잔존가치 실질 회수율에 반영
+  lastInvestWon = invest;                                      // 본인 출자금 — 청산 시 회수 예상액 계산
+  renderSafety();
 }
 
 /* ---------- 확정 조건 표시 (config.json) ---------- */
@@ -1248,7 +1478,7 @@ loadConfig();
         + (n > 1 ? '<button type="button" class="cus-del" data-idx="' + i + '" title="행 삭제" style="border:none;background:transparent;color:var(--series-2);font-weight:800;cursor:pointer;font-size:14px;padding:0 2px">×</button>' : '')
         + '<span style="margin-left:auto;font-weight:700">' + (i + 1) + '</span>'
         + '</div></td>';
-      h += inpCell(i, 'inv', s.inv, INV_MIN, 1);   // 화살표(스피너)는 1억 단위, 직접 기입은 0.1억 단위(blur 시 반올림)
+      h += inpCell(i, 'inv', s.inv, INV_MIN, 1);   // 화살표(스피너)는 1억 단위, 직접 기입은 0.01억 단위(blur 시 반올림)
       h += inpCell(i, 'brand', s.brand, 0, 1).replace('<td>', '<td' + (c.warnBrand ? ' style="' + WARN_STYLE + '"' : '') + '>'); // 스피너 1억, 직접 기입 0.01억 단위
       h += '<td class="c-match"' + (c.warnMatch ? ' style="' + WARN_STYLE + '"' : '') + '>' + fmtEok(c.match) + '</td>';
       h += '<td class="c-share">' + (c.share * 100).toFixed(1) + '%</td>';
@@ -1344,7 +1574,11 @@ loadConfig();
       divRate: Math.round(divRate * 100) / 100,                // 연 배당수익률 (%) — 표시 단위(0.01%)로 반올림해 표준 기본값과 정합
       exitRate: A.sumFund > 0 ? exitProfitLP / A.sumFund : 0,  // 투자금 대비 매각수익률
       exitValueWon: exitValue * 100000000,
-      fundWon: A.sumFund * 100000000
+      fundWon: A.sumFund * 100000000,
+      invEok: A.sumInv,                                        // 매장 투자금 합 (억)
+      fundEok: A.sumFund,                                      // 조합 투자금 = Σ매칭금 (억)
+      salesYearEok: A.sumSales * 12,                           // 연 매출 합 (억)
+      opYearEok: opYear                                        // 연 영업이익 합 (억)
     };
     if (customMode) update();
   }
@@ -1392,7 +1626,7 @@ loadConfig();
       return;
     }
     if (!isFinite(v)) v = key === 'inv' ? INV_MIN : 0.01;
-    if (key === 'inv') v = Math.max(INV_MIN, Math.round(v * 10) / 10);   // 1억 이상, 0.1억 단위
+    if (key === 'inv') v = Math.max(INV_MIN, Math.round(v * 100) / 100);  // 1억 이상, 0.01억 단위
     else v = Math.max(0.01, Math.round(v * 100) / 100);                  // 브랜드 출자금: 0.01억 이상, 0.01억 단위
     stores[i][key] = v;
     el.value = v;
