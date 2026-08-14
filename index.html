@@ -327,7 +327,7 @@
         </div>
         <div class="field">
           <label class="lblrow">그 외 소득공제 합계
-            <span class="autochk"><input type="checkbox" id="autoDeduct">자동 추정</span>
+            <span class="autochk"><input type="checkbox" id="autoDeduct" checked>자동 추정</span>
           </label>
           <div class="inp" id="w_otherDeduct"><input type="text" id="otherDeduct" inputmode="numeric" value="433"><span class="unit">만원</span></div>
           <div class="hint" id="otherDeductHint"></div>
@@ -439,7 +439,7 @@
           <div class="hint">배당 전환 전, 이자를 받는 기간</div>
         </div>
         <div class="field">
-          <label>연 배당률 <span class="sub">(가정)</span></label>
+          <label>연 배당률 <span class="sub" id="dispDivLabel">(가정)</span></label>
           <div class="roval"><span id="dispDiv">-</span></div>
           <div class="hint">표준 지표 기반</div>
         </div>
@@ -449,9 +449,13 @@
     <div class="card">
       <div class="sec-head">
         <div class="sec-num">3</div> 
-        <h2>표준 매출/이익 가정</h2>
-        <span class="sub">표준 지표 기준</span>
+        <h2>매출/이익 가정</h2>
+        <div class="seg" id="segAssump" style="margin-left:auto;flex-shrink:0">
+          <button type="button" data-assump="std" class="on" style="font-size:12.5px;padding:6px 12px;white-space:nowrap;flex:none">표준</button>
+          <button type="button" data-assump="custom" style="font-size:12.5px;padding:6px 12px;white-space:nowrap;flex:none">커스텀</button>
+        </div>
       </div>
+      <div id="stdAssump">
       <p class="explain">본 시뮬레이션은 <b>3억/4억/5억원 규모</b>로 각각 2곳씩, <b>총 6개 매장</b>에 투자하는 것을 기준으로 합니다.</p>
       <table>
         <thead><tr><th>매장 유형</th><th>표준매출 (월)</th><th>표준매출 (연)</th><th>표준 영업이익 (15%)</th><th>매장 수</th></tr></thead>
@@ -468,22 +472,108 @@
           <div class="ex-value">14.76억원</div>
           <div class="ex-note">표준영업이익률 15% 적용</div>
         </div>
-        <div class="ex-arrow">× 평균 펀드 지분률 42.71%</div>
+        <div class="ex-arrow">× 평균 펀드 지분률<br>(42.86%)</div>
         <div class="ex-step">
           <div class="ex-label">조합 배당 수익</div>
-          <div class="ex-value">약 6.3억원</div>
-          <div class="ex-note">연 630,400,000원</div>
+          <div class="ex-value">약 6.33억원</div>
+          <div class="ex-note">연 632,613,600원</div>
         </div>
-        <div class="ex-arrow">÷ 투자금 21억</div>
+        <div class="ex-arrow">÷ 조합 투자금<br>(21억원)</div>
         <div class="ex-step hi">
           <div class="ex-label">배당수익률 (연)</div>
-          <div class="ex-value">30.02%</div>
+          <div class="ex-value">30.12%</div>
           <div class="ex-note">시뮬레이터 기본값</div>
         </div>
       </div>
       <div class="hint" style="margin-top:10px">
 배당 수익은 매장 실매출 및 영업이익에 따라 달라질 수 있습니다.
  </div>
+      </div><!-- /stdAssump -->
+
+      <!-- ===== 커스텀 시뮬레이션 ===== -->
+      <div id="customAssump" style="display:none">
+        <p class="explain">매장별 <b>투자금과 매칭비율</b>을 직접 입력해 시뮬레이션합니다.</p>
+        <style>
+          #customTable th, #customTable td { white-space: nowrap; }
+          #customAssump .t-value, #customAssump .ex-value, #customAssump .ex-label { white-space: nowrap; }
+          #customAssump .ex-arrow, #stdAssump .ex-arrow { white-space: nowrap; text-align: center; }
+          .tiles .t-value { white-space: nowrap; }
+          #customWarn.show { background: var(--warnrow-bg); border: 1px solid var(--series-2); color: var(--series-2); font-weight: 700; }
+          #customWarn.show b { color: var(--series-2); }
+          #customTable tr.drag-over td { box-shadow: inset 0 2px 0 var(--series-1); }
+          .sales-mode { font-family: inherit; font-size: 13.5px; font-weight: 700; color: var(--muted); background: transparent; border: 1.5px solid var(--baseline); border-radius: 8px; padding: 4px 10px; cursor: pointer; }
+          .sales-mode.on { color: #fff; background: var(--series-1); border-color: var(--series-1); }
+          .sales-mode.on input { background: #fff; }
+          .cus-drag { cursor: grab; color: var(--muted); font-size: 13px; user-select: none; padding: 0 2px; }
+          .cus-drag:active { cursor: grabbing; }
+        </style>
+        <div style="display:flex;gap:14px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:8px;background:var(--accent-bg);border:1px solid var(--border);border-radius:10px;padding:7px 12px;font-size:13.5px;font-weight:700;color:var(--ink-1);white-space:nowrap">
+            <span>월 매출 =</span>
+            <button type="button" id="salesModeRate" class="sales-mode" style="display:flex;align-items:center;gap:5px">투자금의
+              <input type="number" id="cusSalesRate" value="30" min="0" max="100" step="1" style="width:52px;border:1.5px solid var(--baseline);border-radius:6px;background:var(--input-bg);padding:3px 6px;font-family:inherit;font-size:14px;font-weight:700;text-align:right;color:var(--ink-1)">%
+            </button>
+            <button type="button" id="salesModeStd" class="sales-mode on" title="3억→8,000만 · 4억→1억3,000만 · 5억→2억 기준, 사이 구간은 보간">표준 가중식</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;background:var(--accent-bg);border:1px solid var(--border);border-radius:10px;padding:7px 12px;font-size:13.5px;font-weight:700;color:var(--ink-1);white-space:nowrap">
+            <span>월 영업이익 = 매출의</span>
+            <input type="number" id="cusOpRate" value="15" min="0" max="100" step="1" style="width:56px;border:1.5px solid var(--baseline);border-radius:8px;background:var(--input-bg);padding:5px 7px;font-family:inherit;font-size:14.5px;font-weight:700;text-align:right;color:var(--ink-1)"><span>%</span>
+          </div>
+          <label style="font-size:14px;font-weight:700;color:var(--ink-1);display:flex;align-items:center;gap:6px;white-space:nowrap;margin-left:auto">정렬
+            <select id="cusSort" style="border:1.5px solid var(--baseline);border-radius:8px;background:var(--input-bg);padding:6px 8px;font-family:inherit;font-size:14px;font-weight:700;color:var(--ink-1)">
+              <option value="seq">작성순서</option>
+              <option value="inv">투자금 순</option>
+              <option value="match">매칭금 순</option>
+              <option value="fund">조합투자금 순</option>
+              <option value="drag">직접 정렬 (드래그)</option>
+            </select>
+          </label>
+        </div>
+        <div style="overflow-x:auto">
+          <table id="customTable" style="min-width:720px"><tbody></tbody></table>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:8px">
+          <button type="button" id="btnAddCol" style="font-family:inherit;font-size:14px;font-weight:700;color:#fff;background:var(--series-1);border:none;border-radius:8px;padding:8px 16px;cursor:pointer">＋ 행 추가</button>
+        </div>
+        <div class="capnote" id="customWarn" style="margin-top:12px"></div>
+        <div class="tiles" style="margin-top:16px">
+          <div class="tile">
+            <div class="t-label">최종 매장 투자금</div>
+            <div class="t-value" id="cusStoreTotal">-</div>
+            <div class="t-note">Σ 투자금</div>
+          </div>
+          <div class="tile">
+            <div class="t-label">최종 조합 투자금</div>
+            <div class="t-value" id="cusFundTotal">-</div>
+            <div class="t-note">Σ (매칭금 + 투자금 ÷ 2)</div>
+          </div>
+          <div class="tile">
+            <div class="t-label">총 조합 지분</div>
+            <div class="t-value" id="cusEquityTotal">-</div>
+            <div class="t-note" id="cusEquityNote">Σ (조합 투자금 × 지분률)</div>
+          </div>
+        </div>
+        <div class="exit-flow" style="margin-top:16px">
+          <div class="ex-step">
+            <div class="ex-label">영업이익 (연)</div>
+            <div class="ex-value" id="cusOpYear">-</div>
+            <div class="ex-note" id="cusOpNote">월 영업이익 = 매출의 15% 가정</div>
+          </div>
+          <div class="ex-arrow" id="cusArrowShare">× 평균 펀드 지분률 -</div>
+          <div class="ex-step">
+            <div class="ex-label">조합 배당 수익 (연)</div>
+            <div class="ex-value" id="cusDivYear">-</div>
+            <div class="ex-note" style="white-space:nowrap">연 영업이익 × 평균 펀드 지분률</div>
+          </div>
+          <div class="ex-arrow" id="cusArrowFund">÷ 조합 투자금 -</div>
+          <div class="ex-step hi">
+            <div class="ex-label">배당수익률 (연)</div>
+            <div class="ex-value" id="cusDivRate">-</div>
+            <div class="ex-note">커스텀 가정 기준</div>
+          </div>
+        </div>
+        <div class="hint" style="margin-top:10px">배당 수익은 매장 실매출 및 영업이익에 따라 달라질 수 있습니다.</div>
+      </div>
     </div>
 
 
@@ -633,6 +723,11 @@
             <div class="bd">조합을 통한 벤처기업 주식 양도차익은 비과세<br>(전환 후 3년 보유 등 요건 충족 시)</div></div>
         </div>
       </div>
+      <div style="background:var(--accent-bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13.5px;color:var(--ink-1);line-height:1.7">
+        <b style="font-size:13px;color:var(--series-1-strong)">GP 수수료 안내</b><br>
+        · <b>관리보수</b> : 연 2% 선취<br>
+        · <b>성과보수</b> : 허들레이트 10% IRR 초과 이익분의 30%
+      </div>
       <div class="disclaimer">
         본 시뮬레이터는 이해를 돕기 위한 간이 계산으로, 근로소득세액공제 등 개인별 세액공제 항목은 반영되어 있지 않으며 실제 환급액 및 수령액과 차이가 있을 수 있습니다.
         <br>배당 수익은 확정된 것이 아닌 가정이며, 회사의 배당가능이익 발생 여부에 따라 지급되지 않을 수 있습니다.
@@ -648,7 +743,7 @@
 var CONFIG = {
   cbRate: 10,        // CB 연 이자율 (%)
   cbYears: 2,        // 이자 지급 기간 (년)
-  divRate: 30,       // 연 배당률 (%)
+  divRate: 30.12,    // 연 배당률 (%) — 표준 흐름도(14.76억 × 42.86% ÷ 21억)와 통일
   fundYears: 5,      // 조합 존속기간 (년)
   mgmtRate: 0.02,    // 고정보수 (연)
   hurdleRate: 0.10,  // 허들레이트 (연, 단리)
@@ -693,11 +788,13 @@ function marginalRate(base) {
   for (var i = 0; i < b.length; i++) if (base <= b[i][0]) return b[i][1];
 }
 var INT_TAX = 0.154, DIV_TAX = 0.154, FUND_YEARS = CONFIG.fundYears;
-var EXIT_RATE = (600000 - 210000) * 0.70 * 0.4271 / 210000;
+var EXIT_RATE = (600000 - 210000) * 0.70 * 0.4286 / 210000;
 var MGMT_RATE = CONFIG.mgmtRate, MGMT_YEARS = CONFIG.fundYears, HURDLE_RATE = CONFIG.hurdleRate, CARRY_RATE = CONFIG.carryRate;
 var showPretax = true, includeSaving = true;
 var includeExit = true;
 var returnPretax = true;
+/* 커스텀 모드 상태: renderCustom()이 채우고 update()가 사용 */
+var customMode = false, customCalc = null;
 function intRet(r) { return returnPretax ? r.intGrossNet : r.intNet; }
 function divRet(r) { return returnPretax ? r.divGrossNet : r.divNet; }
 function calc(p) {
@@ -730,7 +827,7 @@ function calc(p) {
   var divGrossNet = divGross * (1 - feeRate);
   var intNet = intGross * (1 - INT_TAX) * (1 - feeRate);
   var divNet = divGross * (1 - DIV_TAX) * (1 - feeRate);
-  var exitProfit = p.invest * EXIT_RATE;
+  var exitProfit = p.invest * (typeof p.exitRate === 'number' ? p.exitRate : EXIT_RATE);
   var total = saving + intNet + divNet + exitProfit;
   return {
     gwa: gwa, earnedDed: earnedDed, personal: personal, ang: ang, cap: cap,
@@ -860,13 +957,14 @@ function syncOtherDeduct() {
     var pen = Math.min(Math.round(incomeMan * DEDUCT_RATE), DEDUCT_CAP);
     inp.value = (pen + DEDUCT_CARD).toLocaleString('ko-KR');
     document.getElementById('otherDeductHint').innerHTML =
-      basis + ' ' + '× ' + (DEDUCT_RATE * 100) + '% = <b>'
-      + pen.toLocaleString('ko-KR') + '만원</b>' + (pen === DEDUCT_CAP ? ' (상한) ' : '')
-      + '+ ' + DEDUCT_CARD + '만원 (보수적 추정치)'+'<br>*실제 공제 금액 입력 시, 정확도 향상';
+      basis + ' × ' + (DEDUCT_RATE * 100) + '% = <b>'
+      + pen.toLocaleString('ko-KR') + '만원</b>' + (pen === DEDUCT_CAP ? ' (상한) ' : ' ')
+      + '+ ' + DEDUCT_CARD + '만원 (보수적 추정치)'
+      + '<br>*홈택스에서 확인한 실제 소득공제 합계를 입력하면 더 정확해집니다';
   } else {
     document.getElementById('otherDeductHint').innerHTML =
-      '소득공제(추정) = (' + basis + ' × ' + (DEDUCT_RATE * 100) + '%) + '
-      + DEDUCT_CARD + '만원 (보수적 추정치)<br>*실제 공제 금액 입력 시, 정확도 향상';
+      '소득공제(추정) = (' + basis + ' × ' + (DEDUCT_RATE * 100) + '%) + (주택청약, 보험료, 신용카드 등 공제액)'
+      + '<br>*홈택스에서 확인한 실제 소득공제 합계를 입력하면 더 정확해집니다';
   }
 }
 document.getElementById('autoDeduct').addEventListener('change', function() { syncOtherDeduct(); update(); });
@@ -875,14 +973,19 @@ function update() {
   syncOtherDeduct();
   var invest = num('invest') * 10000;
   var cbRate = CONFIG.cbRate, cbYears = CONFIG.cbYears, divRate = CONFIG.divRate;
+  var exitRate = EXIT_RATE, isCus = customMode && customCalc;
+  if (isCus) { divRate = customCalc.divRate; exitRate = customCalc.exitRate; }
+  var dvDisp = isCus ? (Math.round(divRate * 100) / 100) : divRate;   // 표시용 배당률
   document.getElementById('dispRate').textContent = '연 ' + cbRate + '%';
   document.getElementById('dispYears').textContent = cbYears + '년';
-  document.getElementById('dispDiv').textContent = '연 ' + divRate + '% (' + (cbYears + 1) + '~' + FUND_YEARS + '년차)';
+  document.getElementById('dispDiv').textContent = '연 ' + dvDisp + '% (' + (cbYears + 1) + '~' + FUND_YEARS + '년차)';
+  document.getElementById('dispDivLabel').textContent = isCus ? '(커스텀 기준)' : '(가정)';
+  txt('expDivRate', dvDisp);
   var r = calc({
     mode: mode, income: num('income') * 10000,
     dependents: num('dependents'), elderly: num('elderly'), disabled: num('disabled'),
     otherDeduct: num('otherDeduct') * 10000,
-    invest: invest, cbRate: cbRate, cbYears: cbYears, divRate: divRate
+    invest: invest, cbRate: cbRate, cbYears: cbYears, divRate: divRate, exitRate: exitRate
   });
   var slider = document.getElementById('investRange');
   var man = invest / 10000;
@@ -909,9 +1012,11 @@ function update() {
     ? '(연 ' + cbRate + '%) × ' + cbYears + '년' : '';
   document.getElementById('outDividend').textContent = divRate > 0 ? fmtMan(divShown(r)) : '미반영';
   document.getElementById('outDividendNote').textContent = divRate > 0
-    ? '(연 ' + divRate + '% 가정) × ' + r.divYears + '년' : '배당률 가정을 입력하면 계산됩니다';
+    ? '(연 ' + dvDisp + '% 가정) × ' + r.divYears + '년' : '배당률 가정을 입력하면 계산됩니다';
   document.getElementById('outExit').textContent = fmtMan(r.exitProfit);
-  document.getElementById('outExitNote').textContent = '5년차 60억 매각 가정 (출자 비중대로 배분)';
+  document.getElementById('outExitNote').textContent = isCus
+    ? '5년차 ' + fmtManInt(manRound(customCalc.exitValueWon)) + ' 매각 가정 (출자 비중대로 배분)'
+    : '5년차 60억원 매각 가정 (출자 비중대로 배분)';
 
 
   document.getElementById('bigSaving').textContent = fmtMan(r.saving);
@@ -978,7 +1083,7 @@ function update() {
   ch += subRow('cbint', '(-) 운용사 보수 반영', fmt((returnPretax ? r.intGross : r.intGross * (1 - INT_TAX)) * r.feeRate));
   if (divRate > 0) {
     ch += toggleRow('cbdiv', '배당' + (returnPretax ? ' (세전, 3~5년차)' : ' 실수령액 (3~5년차)'), fmt(divRet(r)), 'rowdiv');
-    ch += subRow('cbdiv', '배당 (연 ' + divRate + '% × ' + r.divYears + '년 가정, 세전)', fmt(r.divGross));
+    ch += subRow('cbdiv', '배당 (연 ' + dvDisp + '% × ' + r.divYears + '년 가정, 세전)', fmt(r.divGross));
     if (!returnPretax) ch += subRow('cbdiv', '(-) 배당소득세 15.4%(지방소득세 포함)', fmt(r.divGross * DIV_TAX));
     ch += subRow('cbdiv', '(-) 운용사 보수 반영', fmt((returnPretax ? r.divGross : r.divGross * (1 - DIV_TAX)) * r.feeRate));
   }
@@ -1038,6 +1143,399 @@ function loadConfig() {
   setTimeout(finish, 2500); 
 }
 loadConfig();
+
+/* ========== 커스텀 표준 매출/이익 시뮬레이션 ========== */
+(function() {
+  var MATCH_CAP = 2.5;    // 매칭금 최대 (억)
+  var RATIO_MIN = 0.5;    // 매칭비율 최소 (배)
+  var INV_MIN = 1;        // 투자금 최소 (억)
+  var salesRate = 0.30;   // 매출률 기본 30% (일괄 적용, 변경 가능)
+  var salesMode = 'std';  // 기본: 표준 가중식(구간 보간) | 'rate': 투자금의 N%
+  // 표준 가중식: 3억→0.8억, 4억→1.3억, 5억→2.0억 기준점, 사이 직선 보간·범위 밖 끝 기울기 연장
+  function stdSales(inv) {
+    var v;
+    if (inv <= 4) v = 0.8 + (inv - 3) * 0.5;        // 3~4억 구간 기울기 0.5 (3억 미만도 연장)
+    else if (inv <= 5) v = 1.3 + (inv - 4) * 0.7;   // 4~5억 구간 기울기 0.7
+    else v = 2.0 + (inv - 5) * 0.7;                 // 5억 초과 연장
+    return Math.max(0, v);
+  }
+  var opRate = 0.15;      // 영업이익률 기본 15% (일괄 적용, 변경 가능)
+
+  // 매장 데이터: 투자금(억), 매칭비율(배), _seq: 작성순서
+  // 기본값: 표준 시뮬레이션과 동일하게 3/4/5억 각 2곳 (0.5배·1배 매칭 1곳씩)
+  var seqCounter = 6;
+  var stores = [
+    { inv: 3, ratio: 0.5, _seq: 1 },
+    { inv: 3, ratio: 1, _seq: 2 },
+    { inv: 4, ratio: 0.5, _seq: 3 },
+    { inv: 4, ratio: 1, _seq: 4 },
+    { inv: 5, ratio: 0.5, _seq: 5 },
+    { inv: 5, ratio: 1, _seq: 6 }
+  ];
+
+  function fmtComma(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  // 억 단위 소수 표기: 14.76억원, 21억원
+  function fmtEokDec(v) {
+    var t = (Math.round(v * 100) / 100).toFixed(2).replace(/\.?0+$/, '');
+    return t + '억원';
+  }
+  // 억 단위 → "N억 N,NNN만원" 표기
+  function fmtEok(v) {
+    var man = Math.round(v * 10000);
+    var neg = man < 0; if (neg) man = -man;
+    var s = fmtManInt(man);
+    return (neg ? '-' : '') + s;
+  }
+  function calcStore(s) {
+    var match = s.inv / 2 * s.ratio;                            // 매칭금 = (투자금÷2) × 매칭비율
+    var share = s.ratio > 0 ? s.ratio / (1 + s.ratio) : 0;      // 지분률: 1배→50%, 0.5배→33.3%
+    var fund = match + s.inv / 2;                               // 조합 투자금 = 매칭금 + 투자금/2
+    var autoSales = salesMode === 'std' ? stdSales(s.inv) : s.inv * salesRate;   // 자동값: 모드별 산출
+    var sales = (s.sales != null) ? s.sales : autoSales;        // 수동 입력 시 그 값 사용
+    var op = sales * opRate;                                    // 표준 영업이익(월) = 매출 × 영업이익률
+    return { match: match, share: share, fund: fund, sales: sales, op: op,
+             salesManual: s.sales != null,
+             warnMatch: match > MATCH_CAP + 1e-9, warnRatio: s.ratio < RATIO_MIN - 1e-9 };
+  }
+
+  var WARN_STYLE = 'background:var(--warnrow-bg);color:var(--series-2);font-weight:800';
+  function inpCell(idx, key, val, min, step) {
+    return '<td><input type="number" class="cus-inp" data-idx="' + idx + '" data-key="' + key + '"'
+      + ' value="' + val + '" min="' + min + '" step="' + step + '"'
+      + ' style="width:80px;border:1.5px solid var(--baseline);border-radius:8px;background:var(--input-bg);'
+      + 'padding:6px 8px;font-family:inherit;font-size:15px;font-weight:700;text-align:right;color:var(--ink-1)"></td>';
+  }
+
+  function computeAll() {
+    var calcs = stores.map(calcStore);
+    var A = { calcs: calcs, sumInv: 0, sumMatch: 0, sumFund: 0, sumSales: 0, sumOp: 0, sumEquity: 0 };
+    calcs.forEach(function(c, i) {
+      A.sumInv += stores[i].inv; A.sumMatch += c.match; A.sumFund += c.fund;
+      A.sumSales += c.sales; A.sumOp += c.op;
+      A.sumEquity += c.fund * c.share;   // 조합 투자금 × 지분률
+    });
+    A.avgShare = A.sumFund > 0 ? A.sumEquity / A.sumFund : 0;
+    return A;
+  }
+
+  function renderCustom() {
+    var A = computeAll();
+    var calcs = A.calcs, n = stores.length;
+
+    var h = '';
+    // 헤더 행: 필드명 (가운데 정렬)
+    h += '<tr>'
+      + '<th style="text-align:center">번호</th>'
+      + '<th style="text-align:center">투자금</th>'
+      + '<th style="text-align:center">매칭비율</th>'
+      + '<th style="text-align:center">매칭금</th>'
+      + '<th style="text-align:center">펀드 지분률</th>'
+      + '<th style="text-align:center">표준 매출 (월)</th>'
+      + '<th style="text-align:center">표준 영업이익 (월)</th>'
+      + '<th style="text-align:center">조합 투자금</th>'
+      + '</tr>';
+    // 매장별 행
+    stores.forEach(function(s, i) {
+      var c = calcs[i];
+      h += '<tr>';
+      // 번호: 드래그핸들 + × 왼쪽, 숫자 오른쪽
+      h += '<td><div style="display:flex;align-items:center;gap:2px">'
+        + '<span class="cus-drag" title="드래그로 순서 변경" draggable="false">⠿</span>'
+        + (n > 1 ? '<button type="button" class="cus-del" data-idx="' + i + '" title="행 삭제" style="border:none;background:transparent;color:var(--series-2);font-weight:800;cursor:pointer;font-size:14px;padding:0 2px">×</button>' : '')
+        + '<span style="margin-left:auto;font-weight:700">' + (i + 1) + '</span>'
+        + '</div></td>';
+      h += inpCell(i, 'inv', s.inv, INV_MIN, 1);   // 화살표(스피너)는 1억 단위, 직접 기입은 0.1억 단위(blur 시 반올림)
+      h += inpCell(i, 'ratio', s.ratio, 0.1, 0.1).replace('<td>', '<td class="c-ratio"' + (c.warnRatio ? ' style="' + WARN_STYLE + '"' : '') + '>');
+      h += '<td class="c-match"' + (c.warnMatch ? ' style="' + WARN_STYLE + '"' : '') + '>' + fmtEok(c.match) + '</td>';
+      h += '<td class="c-share">' + (c.share * 100).toFixed(1) + '%</td>';
+      h += '<td><input type="text" inputmode="numeric" class="cus-inp" data-idx="' + i + '" data-key="sales"'
+        + ' value="' + fmtComma(Math.round(c.sales * 10000)) + '"'
+        + ' title="' + (c.salesManual ? '직접 입력값 (비우면 자동값으로 복원)' : (salesMode === 'std' ? '자동값: 표준 가중식 (3억→8,000만 · 4억→1.3억 · 5억→2억 보간)' : '자동값: 투자금 × ' + (Math.round(salesRate * 1000) / 10) + '%')) + '"'
+        + ' style="width:92px;border:1.5px ' + (c.salesManual ? 'solid var(--series-1)' : 'dashed var(--baseline)') + ';border-radius:8px;background:var(--input-bg);'
+        + 'padding:6px 8px;font-family:inherit;font-size:15px;font-weight:700;text-align:right;color:var(--ink-1)">'
+        + '<span style="font-size:12px;color:var(--muted)"> 만원</span></td>';
+      h += '<td class="c-op">' + fmtEok(c.op) + '</td>';
+      h += '<td class="c-fund">' + fmtEok(c.fund) + '</td>';
+      h += '</tr>';
+    });
+    // 합계 행 (각 열 아래 sum)
+    h += '<tr class="hl">'
+      + '<td>합계</td>'
+      + '<td>' + fmtEok(A.sumInv) + '</td>'
+      + '<td>-</td>'
+      + '<td>' + fmtEok(A.sumMatch) + '</td>'
+      + '<td>평균 ' + (A.avgShare * 100).toFixed(2) + '%</td>'
+      + '<td>' + fmtEok(A.sumSales) + '</td>'
+      + '<td>' + fmtEok(A.sumOp) + '</td>'
+      + '<td>' + fmtEok(A.sumFund) + '</td>'
+      + '</tr>';
+    document.querySelector('#customTable tbody').innerHTML = h;
+    renderOutputs(A);
+  }
+
+  // 입력 중 부분 갱신: 입력칸은 건드리지 않고 계산 셀만 패치 (커서 유지)
+  function patchTable(A) {
+    var rows = document.querySelectorAll('#customTable tbody tr');
+    var n = stores.length;
+    if (rows.length !== n + 2) { renderCustom(); return; }   // 구조 불일치 시 전체 재렌더
+    var active = document.activeElement;
+    stores.forEach(function(s, i) {
+      var c = A.calcs[i], cells = rows[i + 1].cells;
+      cells[2].style.cssText = c.warnRatio ? WARN_STYLE : '';
+      cells[3].style.cssText = c.warnMatch ? WARN_STYLE : '';
+      cells[3].textContent = fmtEok(c.match);
+      cells[4].textContent = (c.share * 100).toFixed(1) + '%';
+      var salesInp = cells[5].querySelector('input');
+      if (salesInp && salesInp !== active) {
+        if (!c.salesManual) salesInp.value = fmtComma(Math.round(c.sales * 10000));
+        salesInp.style.border = '1.5px ' + (c.salesManual ? 'solid var(--series-1)' : 'dashed var(--baseline)');
+        salesInp.title = c.salesManual ? '직접 입력값 (비우면 자동값으로 복원)' : (salesMode === 'std' ? '자동값: 표준 가중식 (3억→8,000만 · 4억→1.3억 · 5억→2억 보간)' : '자동값: 투자금 × ' + (Math.round(salesRate * 1000) / 10) + '%');
+      }
+      cells[6].textContent = fmtEok(c.op);
+      cells[7].textContent = fmtEok(c.fund);
+    });
+    var sc = rows[n + 1].cells;
+    sc[1].textContent = fmtEok(A.sumInv);
+    sc[3].textContent = fmtEok(A.sumMatch);
+    sc[4].textContent = '평균 ' + (A.avgShare * 100).toFixed(2) + '%';
+    sc[5].textContent = fmtEok(A.sumSales);
+    sc[6].textContent = fmtEok(A.sumOp);
+    sc[7].textContent = fmtEok(A.sumFund);
+    renderOutputs(A);
+  }
+
+  function renderOutputs(A) {
+    var calcs = A.calcs;
+    // 경고 문구
+    var warns = [];
+    calcs.forEach(function(c, i) {
+      if (c.warnMatch) warns.push('<b>' + (i + 1) + '번 매장</b>: 최대 매칭 한도(<b>2.5억원</b>) 초과');
+      if (c.warnRatio) warns.push('<b>' + (i + 1) + '번 매장</b>: 매칭비율 ' + stores[i].ratio + '배 — 최소 매칭비율(<b>0.5배</b>) 미만');
+    });
+    var wEl = document.getElementById('customWarn');
+    if (warns.length) { wEl.className = 'capnote show'; wEl.innerHTML = '⚠ ' + warns.join('<br>⚠ '); }
+    else wEl.className = 'capnote';
+
+    // 최종 결과
+    document.getElementById('cusStoreTotal').textContent = fmtEok(A.sumInv);
+    document.getElementById('cusFundTotal').textContent = fmtEok(A.sumFund);
+    document.getElementById('cusEquityTotal').textContent = fmtEok(A.sumEquity);
+    document.getElementById('cusEquityNote').textContent = '가중평균 지분률 ' + (A.avgShare * 100).toFixed(2) + '%';
+
+    // 배당수익률 flow — 표준 방식과 동일: 연 영업이익 합계 × 평균 펀드 지분률(조합투자금 가중)
+    var opYear = A.sumOp * 12;
+    var divYear = opYear * A.avgShare;
+    var divRate = A.sumFund > 0 ? divYear / A.sumFund * 100 : 0;
+    document.getElementById('cusOpYear').textContent = fmtEokDec(opYear);
+    document.getElementById('cusOpNote').textContent = '월 영업이익 = 매출의 ' + (Math.round(opRate * 1000) / 10) + '% 가정';
+    document.getElementById('cusArrowShare').innerHTML = '× 평균 펀드 지분률<br>(' + (A.avgShare * 100).toFixed(2) + '%)';
+    document.getElementById('cusDivYear').textContent = '약 ' + fmtEokDec(divYear);
+    document.getElementById('cusArrowFund').innerHTML = '÷ 조합 투자금<br>(' + fmtEokDec(A.sumFund) + ')';
+    document.getElementById('cusDivRate').textContent = divRate.toFixed(2) + '%';
+
+    // 전체 시뮬레이터 연동값 산출
+    // 매각: 표준 가정과 동일 비율 — 연 영업이익 14.76억 → 5년차 EBITDA 20억(성장) × 3배수 = 60억
+    //       커스텀도 같은 비율(연 영업이익 × 60/14.76)로 5년차 기업가치를 산출
+    var exitValue = opYear * (60 / 14.76);
+    var exitProfitLP = Math.max(0, exitValue - A.sumFund) * 0.70 * A.avgShare;
+    customCalc = {
+      divRate: Math.round(divRate * 100) / 100,                // 연 배당수익률 (%) — 표시 단위(0.01%)로 반올림해 표준 기본값과 정합
+      exitRate: A.sumFund > 0 ? exitProfitLP / A.sumFund : 0,  // 투자금 대비 매각수익률
+      exitValueWon: exitValue * 100000000,
+      fundWon: A.sumFund * 100000000
+    };
+    if (customMode) update();
+  }
+
+  // 입력 이벤트 (위임)
+  var tbl = document.getElementById('customTable');
+  tbl.addEventListener('input', function(e) {
+    var el = e.target;
+    if (!el.classList.contains('cus-inp')) return;
+    var key = el.dataset.key;
+    if (key === 'sales') {
+      var raw = el.value.replace(/[^\d]/g, '');
+      if (raw === '') return;                    // 비어있으면 blur에서 자동값 복원
+      var n = parseInt(raw, 10);
+      stores[+el.dataset.idx].sales = n / 10000; // 만원 → 억 환산
+      // 천단위 쉼표 재포맷 + 커서 보존
+      var pos = el.selectionStart;
+      var digitsBefore = el.value.slice(0, pos).replace(/[^\d]/g, '').length;
+      el.value = fmtComma(n);
+      var idx2 = 0, cnt = 0;
+      while (idx2 < el.value.length && cnt < digitsBefore) { if (/\d/.test(el.value[idx2])) cnt++; idx2++; }
+      try { el.setSelectionRange(idx2, idx2); } catch (err) {}
+      patchTable(computeAll());
+      return;
+    }
+    var v = parseFloat(el.value);
+    if (!isFinite(v)) return; // 입력 중에는 유지
+    stores[+el.dataset.idx][key] = v;
+    patchTable(computeAll());   // 입력칸은 다시 그리지 않음 → 커서 유지
+  });
+  tbl.addEventListener('focusout', function(e) {
+    var el = e.target;
+    if (!el.classList.contains('cus-inp')) return;
+    var i = +el.dataset.idx, key = el.dataset.key;
+    var v = parseFloat(el.value);
+    if (key === 'sales') {
+      var raw2 = el.value.replace(/[^\d]/g, '');
+      if (raw2 === '') stores[i].sales = null;                              // 비우면 자동값(투자금×30%) 복원
+      else stores[i].sales = Math.max(0, parseInt(raw2, 10)) / 10000;       // 만원 단위 정수 → 억
+      var c = calcStore(stores[i]);
+      el.value = fmtComma(Math.round(c.sales * 10000));
+      el.style.border = '1.5px ' + (c.salesManual ? 'solid var(--series-1)' : 'dashed var(--baseline)');
+      el.title = c.salesManual ? '직접 입력값 (비우면 자동값으로 복원)' : (salesMode === 'std' ? '자동값: 표준 가중식 (3억→8,000만 · 4억→1.3억 · 5억→2억 보간)' : '자동값: 투자금 × ' + (Math.round(salesRate * 1000) / 10) + '%');
+      patchTable(computeAll());   // 재렌더 없이 패치 → 다음 입력칸 포커스 유지
+      return;
+    }
+    if (!isFinite(v)) v = key === 'inv' ? INV_MIN : RATIO_MIN;
+    if (key === 'inv') v = Math.max(INV_MIN, Math.round(v * 10) / 10);  // 1억 이상, 0.1억 단위
+    else v = Math.max(0.1, Math.round(v * 10) / 10);
+    stores[i][key] = v;
+    el.value = v;
+    patchTable(computeAll());     // 재렌더 없이 패치 → 다음 입력칸 포커스 유지
+  });
+  tbl.addEventListener('click', function(e) {
+    var btn = e.target.closest('.cus-del');
+    if (!btn) return;
+    stores.splice(+btn.dataset.idx, 1);
+    renderCustom();
+  });
+  document.getElementById('btnAddCol').addEventListener('click', function() {
+    stores.push({ inv: 3, ratio: 1, _seq: ++seqCounter });   // 번호는 순서대로 자동 부여
+    applySort();
+    renderCustom();
+  });
+
+  // ── 정렬 ──
+  var sortSel = document.getElementById('cusSort');
+  function applySort() {
+    var v = sortSel.value;
+    if (v === 'seq') stores.sort(function(a, b) { return a._seq - b._seq; });
+    else if (v === 'inv') stores.sort(function(a, b) { return b.inv - a.inv; });
+    else if (v === 'match') stores.sort(function(a, b) { return calcStore(b).match - calcStore(a).match; });
+    else if (v === 'fund') stores.sort(function(a, b) { return calcStore(b).fund - calcStore(a).fund; });
+    // 'drag': 현재 순서 유지
+  }
+  sortSel.addEventListener('change', function() { applySort(); renderCustom(); });
+
+  // ── 드래그로 행 순서 변경 ──
+  var dragIdx = null;
+  function rowStoreIdx(el) {
+    var tr = el && el.closest ? el.closest('#customTable tr') : null;
+    if (!tr) return null;
+    var idx = tr.rowIndex - 1;                       // 0행은 헤더
+    if (idx < 0) return 0;
+    if (idx >= stores.length) return stores.length - 1;   // 합계 행 → 마지막으로
+    return idx;
+  }
+  function clearDragOver() {
+    document.querySelectorAll('#customTable tr.drag-over').forEach(function(tr) { tr.classList.remove('drag-over'); });
+  }
+  tbl.addEventListener('mousedown', function(e) {
+    var h = e.target.closest('.cus-drag');
+    if (h) h.closest('tr').draggable = true;         // 핸들을 잡았을 때만 드래그 가능
+  });
+  tbl.addEventListener('dragstart', function(e) {
+    var tr = e.target.closest('tr');
+    if (!tr || !tr.draggable) { e.preventDefault(); return; }
+    dragIdx = tr.rowIndex - 1;
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', ''); } catch (err) {}
+    }
+  });
+  tbl.addEventListener('dragover', function(e) {
+    if (dragIdx == null) return;
+    e.preventDefault();
+    clearDragOver();
+    var tr = e.target.closest('tr');
+    if (tr && tr.rowIndex >= 1 && tr.rowIndex <= stores.length) tr.classList.add('drag-over');
+  });
+  tbl.addEventListener('drop', function(e) {
+    if (dragIdx == null) return;
+    e.preventDefault();
+    clearDragOver();
+    var to = rowStoreIdx(e.target);
+    if (to == null || to === dragIdx) { dragIdx = null; return; }
+    var item = stores.splice(dragIdx, 1)[0];
+    stores.splice(to, 0, item);
+    dragIdx = null;
+    sortSel.value = 'drag';                          // 수동 정렬 상태로 전환
+    renderCustom();
+  });
+  tbl.addEventListener('dragend', function(e) {
+    clearDragOver();
+    var tr = e.target.closest('tr');
+    if (tr) tr.draggable = false;
+    dragIdx = null;
+  });
+  var modeRateBtn = document.getElementById('salesModeRate');
+  var modeStdBtn = document.getElementById('salesModeStd');
+  function setSalesMode(m) {
+    if (m === salesMode) return;
+    salesMode = m;
+    modeRateBtn.classList.toggle('on', m === 'rate');
+    modeStdBtn.classList.toggle('on', m === 'std');
+    stores.forEach(function(s) { s.sales = null; });   // 모드 전환 시 자동값으로 재산출
+    patchTable(computeAll());
+  }
+  modeRateBtn.addEventListener('click', function(e) {
+    if (e.target.id === 'cusSalesRate') { setSalesMode('rate'); return; }   // 입력칸 클릭 시에도 rate 모드
+    setSalesMode('rate');
+  });
+  modeStdBtn.addEventListener('click', function() { setSalesMode('std'); });
+  var salesRateEl = document.getElementById('cusSalesRate');
+  function setSalesRate(v) {
+    var nr = Math.min(100, Math.max(0, v)) / 100;
+    if (nr === salesRate) return;
+    salesRate = nr;
+    stores.forEach(function(s) { s.sales = null; });   // 일괄 매출률 기입 시 개별 커스텀 매출도 새 비율로 변동
+    patchTable(computeAll());
+  }
+  salesRateEl.addEventListener('input', function() {
+    var v = parseFloat(this.value);
+    if (!isFinite(v)) return;
+    if (salesMode !== 'rate') setSalesMode('rate');
+    setSalesRate(v);
+  });
+  salesRateEl.addEventListener('focusout', function() {
+    var v = parseFloat(this.value);
+    if (!isFinite(v)) v = 30;
+    v = Math.min(100, Math.max(0, Math.round(v * 10) / 10));
+    this.value = v;
+    setSalesRate(v);
+    patchTable(computeAll());
+  });
+  var opRateEl = document.getElementById('cusOpRate');
+  opRateEl.addEventListener('input', function() {
+    var v = parseFloat(this.value);
+    if (!isFinite(v)) return;
+    opRate = Math.min(100, Math.max(0, v)) / 100;
+    patchTable(computeAll());
+  });
+  opRateEl.addEventListener('focusout', function() {
+    var v = parseFloat(this.value);
+    if (!isFinite(v)) v = 15;
+    v = Math.min(100, Math.max(0, Math.round(v * 10) / 10));
+    opRate = v / 100;
+    this.value = v;
+    patchTable(computeAll());
+  });
+  document.getElementById('segAssump').addEventListener('click', function(e) {
+    var btn = e.target.closest('button[data-assump]');
+    if (!btn) return;
+    this.querySelectorAll('button').forEach(function(b) { b.classList.toggle('on', b === btn); });
+    var on = btn.dataset.assump === 'custom';
+    if (on === customMode) return;
+    customMode = on;
+    document.getElementById('stdAssump').style.display = on ? 'none' : '';
+    document.getElementById('customAssump').style.display = on ? '' : 'none';
+    if (on) renderCustom();   // customCalc 갱신 후 내부에서 update() 호출
+    else update();            // 표준 가정으로 전체 재계산
+  });
+})();
 </script>
 </body>
 </html>
