@@ -720,14 +720,14 @@
       <div class="sec-head"><div class="sec-num">2</div><h2>청산 잔존 가치</h2></div>
       <p class="explain">사업이 조기 종료되더라도 시나리오별로 <b>회수 가능한 최소 가치</b>입니다.</p>
       <div style="overflow-x:auto"><table id="safeLiqTable" style="min-width:560px"><tbody></tbody></table></div>
-      <div class="hint" style="margin-top:10px">매장 투자금은 <b>보증금 30% · 권리금 20% · 시설비 50%</b> 구성을 기준으로 한 가정이며, 실제 비율과 회수 금액은 매장 조건·계약 내용·청산 시점에 따라 달라질 수 있습니다.<br>절세 포함 실질 회수율 = 회수율 + 세제혜택 절세율 (세제혜택 탭의 본인 소득·출자 조건 기준)</div>
+      <div class="hint" style="margin-top:10px">매장 투자금은 <b>보증금 30% · 권리금 20% · 시설비 50%</b> 구성을 기준으로 한 가정입니다.<br>실제 비율과 회수 금액은 매장 조건, 계약 내용, 청산 시점 등에 따라 달라질 수 있습니다.<br>절세 포함 실질 회수율 = 회수율 + 세제혜택 절세율 (개인소득 및 출자 조건 기준)</div>
     </div>
 
     <div class="card">
       <div class="sec-head"><div class="sec-num">3</div><h2>원금회수</h2><span class="sub">원금상환율 120% 이상 적격</span></div>
-      <p class="explain">투자기간(5년) 동안 지급되는 <b>이자+배당</b>만으로 투자금 이상을 확보할 수 있는지 판단합니다.</p>
+      <p class="explain">투자기간(5년) 동안 확보되는 가치로 <b>투자금 이상을 회수</b>할 수 있는지 판단합니다.</p>
       <div style="overflow-x:auto"><table id="safePayTable" style="min-width:520px"><tbody></tbody></table></div>
-      <div class="hint" style="margin-top:10px">원금상환율 = 투자기간 세전이익 총합 ÷ 투자금</div>
+      <div class="hint" style="margin-top:10px">원금상환율 = (투자기간 세전이익 총합 + 최소 잔존가치) ÷ 투자금</div>
     </div>
 
     <div class="card">
@@ -1146,14 +1146,15 @@ function renderSafety() {
     + liqRow('TIER 3', '이상적', true, true, true);
   safeSummaryLiq = Math.round((D.inv > 0 ? dep / D.inv * 100 : 0) + savingPct);   // TIER 1 절세 포함 = 최악 시나리오 최소 회수율
 
-  // 3) 원금회수 — 세전이익(투자기간) = 이자(2년) + 배당(3년), 원금상환율 = ÷ 투자금, 120% 이상 적격
+  // 3) 원금회수 — 세전이익(이자 2년 + 배당 3년) + 최소 잔존가치(보증금), 원금상환율 = ÷ 투자금, 120% 이상 적격
   var pretax = D.fund * (cbRate * cbYears + D.divRate * divYears) / 100;
-  var payRate = D.fund > 0 ? pretax / D.fund * 100 : 0;
+  var payRate = D.fund > 0 ? (pretax + dep) / D.fund * 100 : 0;
   var payOk = payRate >= 120;
   document.querySelector('#safePayTable tbody').innerHTML =
-    '<tr><th style="text-align:left">투자금액</th><th>세전이익 (투자기간 ' + FUND_YEARS + '년)</th><th>원금상환율</th><th>판단</th></tr>'
+    '<tr><th style="text-align:left">투자금액</th><th>세전이익 (투자기간 ' + FUND_YEARS + '년)</th><th>최소 잔존가치</th><th>원금상환율</th><th>판단</th></tr>'
     + '<tr><td>' + fmtEokG(D.fund) + '</td>'
     + '<td>' + fmtEokG(pretax) + '<br><span style="font-size:12px;color:var(--muted)">이자 ' + cbYears + '년 + 배당 ' + divYears + '년 (연 ' + D.divRate + '%)</span></td>'
+    + '<td>' + fmtEokG(dep) + '<br><span style="font-size:12px;color:var(--muted)">TIER 1</span></td>'
     + '<td class="em">' + payRate.toFixed(1) + '%</td>'
     + '<td style="font-weight:800;color:' + (payOk ? 'var(--series-1)' : 'var(--series-2)') + '">' + (payOk ? '적격' : '부적격') + '</td></tr>';
 
