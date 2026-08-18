@@ -1152,9 +1152,9 @@ function renderSafety() {
   var cbInp = document.getElementById('safeCbInp');
   if (!safeCbTouched) cbInp.value = cbRate;
   var secRate = parseFloat(cbInp.value); if (!isFinite(secRate) || secRate <= 0) secRate = cbRate;
-  var intYear = D.fund * secRate / 100;
+  var intYear = D.inv * secRate / 100;
   document.getElementById('safeIntAmt').textContent = fmtEokG(intYear);
-  document.getElementById('safeIntNote').textContent = '조합 투자금 ' + fmtEokG(D.fund) + ' × 연 ' + secRate + '%';
+  document.getElementById('safeIntNote').textContent = '조합 투자금 ' + fmtEokG(D.inv) + ' × 연 ' + secRate + '%';
   document.getElementById('safeIntVsSales').textContent = D.salesYear > 0 ? (intYear / D.salesYear * 100).toFixed(2) + '%' : '-';
   document.getElementById('safeSalesNote').textContent = '연 매출 ' + fmtEokG(D.salesYear) + ' 기준';
   document.getElementById('safeIntVsOp').textContent = D.opYear > 0 ? (intYear / D.opYear * 100).toFixed(2) + '%' : '-';
