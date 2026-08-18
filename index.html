@@ -232,6 +232,15 @@
     .tabbar button { font-size: 13px; padding: 10px 3px; }
   }
   .tabbar button.on { background: var(--series-1); color: #fff; }
+  @media (max-width: 680px) {
+    .seg.seg-tax button { font-size: 12.5px; padding: 7px 10px; }
+    .sec-head h2 { font-size: 16.5px; }
+  }
+  .scrollx { overflow-x: auto; }
+  .scrollx table { min-width: 520px; }
+  .scrollx th, .scrollx td { white-space: nowrap; }
+  #exitTable td:last-child { white-space: nowrap; }
+  #safeLiqTable th, #safeLiqTable td { white-space: nowrap; }
   .tabbar button:not(.on):hover { background: var(--accent-bg); }
   /* 매각수익 flow */
   .exit-flow { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
@@ -463,15 +472,15 @@
       </div>
       <div id="stdAssump">
       <p class="explain">본 시뮬레이션은 <b>3억/4억/5억원 규모</b>로 각각 2곳씩, <b>총 6개 매장(매장 투자금 24억)</b>에 투자하는 것을 기준으로 합니다.<br>매장 투자금 24억원은 <b>브랜드 출자 15억원 + 조합 매칭 9억원</b>으로 구성됩니다.</p>
-      <table>
+      <div class="scrollx"><table>
         <thead><tr><th>투자금</th><th>표준매출 (월)</th><th>표준매출 (연)</th><th>표준 영업이익 (15%)</th><th>매장 수</th></tr></thead>
         <tbody>
           <tr><td><b>3억</b></td><td>8,000만원</td><td>9.6억원</td><td><b>1.44억원</b></td><td>2개</td></tr>
           <tr><td><b>4억</b></td><td>13,000만원</td><td>15.6억원</td><td><b>2.34억원</b></td><td>2개</td></tr>
           <tr><td><b>5억</b></td><td>20,000만원</td><td>24억원</td><td><b>3.6억원</b></td><td>2개</td></tr>
-          <tr class="hl"><td>합계 (연 영업이익)</td><td colspan="3">14.76억원</td><td></td></tr>
+          <tr class="hl"><td>합계</td><td colspan="3">14.76억원</td><td></td></tr>
         </tbody>
-      </table>
+      </table></div>
       <div class="exit-flow" style="margin-top:16px">
         <div class="ex-step">
           <div class="ex-label">영업이익 (연)</div>
@@ -606,10 +615,10 @@
 
       </div>
 <p class="explain">이자 지급 기간(<span id="expIntSpan">-</span>)에는 <b>고정이자 <span id="expIntRate">-</span>%</b>를 지급하고, <br>전환 후(<span id="expDivSpan">-</span>)에는 <b>매장 이익 100%를 지분율에 따라</b> 배당으로 지급합니다.</p>
-      <table id="timelineTable">
+      <div class="scrollx"><table id="timelineTable">
         <thead><tr><th>연차</th><th>수익 구분</th><th>세전</th><th id="tlNetHead">세후 실수령</th><th id="tlCumHead">누적</th></tr></thead>
         <tbody></tbody>
-      </table>
+      </table></div>
       <div class="hint" style="margin-top:10px">
 본 시뮬레이션은 표준 지표에 따라 배당 연 수익률을 <span id="expDivRate">-</span>%로 가정해 계산되었습니다.<br>배당 수익은 매장 실매출 및 영업이익에 따라 달라질 수 있습니다.</div>
     </div>
